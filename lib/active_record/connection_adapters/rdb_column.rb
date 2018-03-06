@@ -3,7 +3,7 @@ module ActiveRecord
     class RdbColumn < Column
 
       class << self
-        delegate :boolean_domain, to: 'ActiveRecord::ConnectionAdapters::FbAdapter'
+        delegate :boolean_domain, to: 'ActiveRecord::ConnectionAdapters::RdbAdapter'
 
         def sql_type_for(field)
           type, sub_type, domain = field.values_at(:type, :sub_type, :domain)
@@ -14,6 +14,8 @@ module ActiveRecord
               sql_type << "(#{field[:precision]},#{field[:scale].abs})"
             when /(int|float|double|char|varchar|bigint)/
               sql_type << "(#{field[:limit]})"
+            else
+              sql_type << ''
           end
 
           sql_type << ' sub_type text' if sql_type =~ /blob/ && sub_type == 1
