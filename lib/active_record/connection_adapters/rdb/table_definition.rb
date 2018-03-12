@@ -3,7 +3,10 @@ module ActiveRecord
     module Rdb
       module ColumnMethods
 
+        attr_accessor :needs_sequence
+
         def primary_key(name, type = :primary_key, **options)
+          self.needs_sequence = true
           super
         end
 

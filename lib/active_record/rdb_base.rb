@@ -27,6 +27,9 @@ module ActiveRecord
         config[:database] = File.expand_path(config[:database], defined?(Rails) && Rails.root)
       end
       config[:database] = "#{config[:host]}/#{port}:#{config[:database]}" if config[:host]
+      #config[:charset] = config[:charset].gsub(/-/, '') if config[:charset]
+      #config[:encoding] = config[:encoding].gsub(/-/, '') if config[:encoding]
+      config[:page_size] = 8192 unless config[:page_size]
       config
     end
   end

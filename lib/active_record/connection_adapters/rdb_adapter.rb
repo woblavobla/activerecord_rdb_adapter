@@ -31,7 +31,7 @@ module ActiveRecord
       cattr_reader :boolean_domain
 
       def self.boolean_domain=(domain)
-        FbColumn::TRUE_VALUES << domain[:true]
+        RdbColumn::TRUE_VALUES << domain[:true]
         @@boolean_domain = domain
       end
 

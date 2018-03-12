@@ -53,9 +53,242 @@ module ActiveRecord
           end
         end
 
-        def column_type_for(field)
-          sql_type = RdbColumn.sql_type_for(field)
-          [lookup_cast_type(sql_type), sql_type]
+        def create_table(name, options = {}) # :nodoc:
+          if options.key? :temporary
+            fail ActiveRecordError, 'Firebird does not support temporary tables'
+          end
+
+          if options.key? :as
+            fail ActiveRecordError, 'Firebird does not support creating tables with a select'
+          end
+
+          if options.key? :force
+            drop_table name, {:if_exists => true}
+          end
+
+          needs_sequence = options[:id]
+
+          super name, options do |table_def|
+            yield table_def if block_given?
+            needs_sequence ||= table_def.needs_sequence
+          end
+
+          return if options[:sequence] == false || !needs_sequence
+          create_sequence(options[:sequence] || default_sequence_name(name))
+          trg_sql = <<-END_SQL
+            CREATE TRIGGER N$#{name.upcase} FOR #{name.upcase}
+            ACTIVE BEFORE INSERT
+            AS
+            declare variable gen_val bigint;
+            BEGIN
+              if (new.ID is null) then
+                new.ID = next value for #{options[:sequence] || default_sequence_name(name)};
+              else begin
+                gen_val = gen_id(#{options[:sequence] || default_sequence_name(name)}, 1);
+                if (new.ID > gen_val) then
+                  gen_val = gen_id(#{options[:sequence] || default_sequence_name(name)}, new.ID - gen_val);
+              end
+            END
+          END_SQL
+          execute(trg_sql)
+        end
+
+        def drop_table(name, options = {}) # :nodoc:
+          drop_sql = "DROP TABLE #{quote_table_name(name)}"
+          if options[:if_exists]
+            drop = !execute(squish_sql(<<-end_sql))
+            select 1 from rdb$relations where rdb$relation_name = #{quote_table_name(name).gsub(/"/, '\'')}
+            end_sql
+                       .fetchall.empty?
+          end
+
+          trigger_name = "N$#{name.upcase}"
+          drop_trigger(trigger_name) if trigger_exists?(trigger_name)
+
+          sequence_name = options[:sequence] || default_sequence_name(name)
+          drop_sequence(sequence_name) if sequence_exists?(sequence_name)
+
+          execute(drop_sql) if drop
+        end
+
+        def create_sequence(sequence_name)
+          execute("CREATE SEQUENCE #{sequence_name}") rescue nil
+        end
+
+        def drop_sequence(sequence_name)
+          execute("DROP SEQUENCE #{sequence_name}") rescue nil
+        end
+
+        def trigger_exists?(trigger_name)
+          execute(squish_sql(<<-end_sql))
+            select 1
+            from rdb$triggers
+             where rdb$trigger_name = '#{trigger_name}'
+          end_sql
+              .fetchall.size > 0
+        end
+
+        def add_column(table_name, column_name, type, options = {})
+          super
+
+          if type == :primary_key && options[:sequence] != false
+            create_sequence(options[:sequence] || default_sequence_name(table_name))
+          end
+
+          return unless options[:position]
+          # position is 1-based but add 1 to skip id column
+          execute(squish_sql(<<-end_sql))
+            ALTER TABLE #{quote_table_name(table_name)}
+            ALTER COLUMN #{quote_column_name(column_name)}
+            POSITION #{options[:position] + 1}
+          end_sql
+        end
+
+        def remove_column(table_name, column_name, type = nil, options = {})
+          indexes(table_name).each do |i|
+            if i.columns.any? {|c| c == column_name.to_s}
+              remove_index! i.table, i.name
+            end
+          end
+
+          column_exist = execute(squish_sql(<<-END_SQL))
+          select 1 from RDB$RELATION_FIELDS rf
+            where lower(rf.RDB$RELATION_NAME) = '#{table_name.downcase}' and lower(rf.RDB$FIELD_NAME) = '#{column_name.downcase}'
+          END_SQL
+                             .fetchall.size > 0
+          super if column_exist
+        end
+
+        def change_column(table_name, column_name, type, options = {})
+          type_sql = type_to_sql(type, *options.values_at(:limit, :precision, :scale))
+
+          if [:text, :string].include?(type)
+            copy_column = 'c_temp'
+            add_column table_name, copy_column, type, options
+            execute(squish_sql(<<-end_sql))
+            UPDATE #{table_name} SET #{copy_column} = #{column_name};
+            end_sql
+            remove_column table_name, column_name
+            rename_column table_name, copy_column, column_name
+          else
+            execute(squish_sql(<<-end_sql))
+            ALTER TABLE #{quote_table_name(table_name)}
+            ALTER COLUMN #{quote_column_name(column_name)} TYPE #{type_sql}
+            end_sql
+          end
+          change_column_null(table_name, column_name, !!options[:null]) if options.key?(:null)
+          change_column_default(table_name, column_name, options[:default]) if options.key?(:default)
+
+
+        end
+
+        def change_column_default(table_name, column_name, default)
+          execute(squish_sql(<<-end_sql))
+            ALTER TABLE #{quote_table_name(table_name)}
+            ALTER #{quote_column_name(column_name)}
+            SET DEFAULT #{quote(default)}
+          end_sql
+        end
+
+        def change_column_null(table_name, column_name, null, default = nil)
+          change_column_default(table_name, column_name, default) if default
+
+          execute(squish_sql(<<-end_sql))
+            UPDATE RDB$RELATION_FIELDS
+            SET RDB$NULL_FLAG=#{quote(null ? nil : 1)}
+            WHERE RDB$FIELD_NAME='#{ar_to_fb_case(column_name)}'
+            AND RDB$RELATION_NAME='#{ar_to_fb_case(table_name)}'
+          end_sql
+        end
+
+        def rename_column(table_name, column_name, new_column_name)
+          execute(squish_sql(<<-end_sql))
+            ALTER TABLE #{quote_table_name(table_name)}
+            ALTER #{quote_column_name(column_name)}
+            TO #{quote_column_name(new_column_name)}
+          end_sql
+
+          rename_column_indexes(table_name, column_name, new_column_name)
+        end
+
+        def remove_index!(_table_name, index_name)
+          execute "DROP INDEX #{quote_column_name(index_name)}"
+        end
+
+        def remove_index(table_name, options = {})
+          index_name = index_name(table_name, options)
+          execute "DROP INDEX #{quote_column_name(index_name)}"
+        end
+
+        def index_name(table_name, options) #:nodoc:
+          if options.respond_to?(:keys) # legacy support
+            if options[:column]
+              index_name = "#{table_name}_#{Array.wrap(options[:column]) * '_'}"
+              if index_name.length > 31
+                "IDX_#{Digest::SHA256.hexdigest(index_name)[0..22]}"
+              else
+                index_name
+              end
+            elsif options[:name]
+              options[:name]
+            else
+              fail ArgumentError, "You must specify the index name"
+            end
+          else
+            index_name(table_name, :column => options)
+          end
+        end
+
+        def type_to_sql(type, limit = nil, precision = nil, scale = nil, **args)
+          if !args.nil? && !args.empty?
+            limit = args[:limit] if limit == nil
+            precision = args[:precision] if precision == nil
+            scale = args[:scale] if scale == nil
+          end
+          case type
+            when :integer
+              integer_to_sql(limit)
+            when :float
+              float_to_sql(limit)
+            when :text
+              text_to_sql(limit)
+            when :blob
+              binary_to_sql(limit)
+            when :string
+              text_to_sql(limit)
+            else
+              type = type.to_sym if type
+              if native = native_database_types[type]
+                column_type_sql = (native.is_a?(Hash) ? native[:name] : native).dup
+
+                if type == :decimal # ignore limit, use precision and scale
+                  scale ||= native[:scale]
+
+                  if precision ||= native[:precision]
+                    if scale
+                      column_type_sql << "(#{precision},#{scale})"
+                    else
+                      column_type_sql << "(#{precision})"
+                    end
+                  elsif scale
+                    raise ArgumentError, "Error adding decimal column: precision cannot be empty if scale is specified"
+                  end
+
+                elsif [:datetime, :timestamp, :time, :interval].include?(type) && precision ||= native[:precision]
+                  if (0..6) === precision
+                    column_type_sql << "(#{precision})"
+                  else
+                    raise(ActiveRecordError, "No #{native[:name]} type has precision of #{precision}. The allowed range of precision is from 0 to 6")
+                  end
+                elsif (type != :primary_key) && (limit ||= native.is_a?(Hash) && native[:limit])
+                  column_type_sql << "(#{limit})"
+                end
+
+                column_type_sql
+              else
+                type.to_s
+              end
+          end
         end
 
         private
@@ -94,6 +327,47 @@ module ActiveRecord
            :binary => {:name => 'blob'},
            :boolean => {:name => boolean_domain[:name]}
           }
+        end
+
+        def column_type_for(field)
+          sql_type = RdbColumn.sql_type_for(field)
+
+          if ActiveRecord::VERSION::STRING < "4.2.0"
+            [sql_type]
+          else
+            [lookup_cast_type(sql_type), sql_type]
+          end
+        end
+
+        def integer_to_sql(limit)
+          return 'integer' if limit.nil?
+          case limit
+            when 1..2 then
+              'smallint'
+            when 3..4 then
+              'integer'
+            when 5..8 then
+              'bigint'
+            else
+              fail ActiveRecordError, "No integer type has byte size #{limit}. "\
+                                    "Use a NUMERIC with PRECISION 0 instead."
+          end
+        end
+
+        def float_to_sql(limit)
+          (limit.nil? || limit <= 4) ? 'float' : 'double precision'
+        end
+
+        def text_to_sql(limit)
+          if limit && limit > 0
+            "VARCHAR(#{limit})"
+          else
+            "VARCHAR(100)"
+          end
+        end
+
+        def sequence_exists?(sequence_name)
+          @connection.generator_names.include?(sequence_name)
         end
 
         def create_table_definition(*args)
