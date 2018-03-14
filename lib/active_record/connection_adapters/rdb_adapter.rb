@@ -18,6 +18,8 @@ require 'active_record/connection_adapters/rdb/quoting'
 require 'active_record/connection_adapters/rdb_column'
 require 'active_record/rdb_base'
 
+require 'active_record/connection_adapters/rdb/core_ext/relation'
+
 module ActiveRecord
   module ConnectionAdapters
     class RdbAdapter < AbstractAdapter
