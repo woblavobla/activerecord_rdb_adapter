@@ -119,6 +119,10 @@ module ActiveRecord
           execute("DROP SEQUENCE #{sequence_name}") rescue nil
         end
 
+        def drop_trigger(trigger_name)
+          execute("DROP TRIGGER #{trigger_name}") rescue nil
+        end
+
         def trigger_exists?(trigger_name)
           execute(squish_sql(<<-end_sql))
             select 1
