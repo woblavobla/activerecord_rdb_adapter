@@ -30,7 +30,7 @@ module ActiveRecord
         end
 
         def quoted_true # :nodoc:
-          quote unquoted_true
+          quote :true
         end
 
         def unquoted_false
@@ -38,7 +38,7 @@ module ActiveRecord
         end
 
         def quoted_false # :nodoc:
-          quote unquoted_false
+          quote :false
         end
 
         def lookup_cast_type_from_column(column) # :nodoc:

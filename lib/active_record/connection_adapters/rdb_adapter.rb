@@ -59,6 +59,10 @@ module ActiveRecord
         'rdb'
       end
 
+      def schema_creation
+        Rdb::SchemaCreation.new self
+      end
+
       def supports_migrations?
         true
       end

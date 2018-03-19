@@ -73,6 +73,8 @@ module ActiveRecord
             needs_sequence ||= table_def.needs_sequence
           end
 
+          commit_db_transaction
+
           return if options[:sequence] == false || !needs_sequence
           create_sequence(options[:sequence] || default_sequence_name(name))
           trg_sql = <<-END_SQL

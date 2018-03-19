@@ -5,6 +5,28 @@ module ActiveRecord
 
         private
 
+        def visit_ColumnDefinition(o)
+          o.sql_type = type_to_sql(o.type, o.options)
+          column_sql = "#{quote_column_name(o.name)} #{o.sql_type}"
+          add_column_options!(column_sql, column_options(o)) unless o.type == :primary_key
+          column_sql
+        end
+
+        def add_column_options!(sql, options)
+          sql << " DEFAULT #{quote_default_expression(options[:default], options[:column])}" if options_include_default?(options)
+          # must explicitly check for :null to allow change_column to work on migrations
+          if options[:null] == false
+            sql << " NOT NULL"
+          end
+          if options[:auto_increment] == true
+            sql << " AUTO_INCREMENT"
+          end
+          if options[:primary_key] == true
+            sql << " PRIMARY KEY"
+          end
+          sql
+        end
+
         def visit_TableDefinition(o)
           create_sql = "CREATE#{' TEMPORARY' if o.temporary} TABLE #{quote_table_name(o.name)} "
 
