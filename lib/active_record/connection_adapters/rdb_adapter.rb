@@ -40,6 +40,8 @@ module ActiveRecord
       @@default_transaction_isolation = :read_committed
       cattr_accessor :default_transaction_isolation
 
+      ADAPTER_NAME = 'rdb'.freeze
+
       def initialize(connection, logger = nil, config = {})
         super(connection, logger, config)
         # Our Responsibility
@@ -56,7 +58,7 @@ module ActiveRecord
       end
 
       def adapter_name
-        'rdb'
+        ADAPTER_NAME
       end
 
       def schema_creation
