@@ -23,10 +23,10 @@ module ActiveRecord
 
         def quote_table_name_for_assignment(_table, attr)
           quote_column_name(attr)
-        end if ::ActiveRecord::VERSION::MAJOR >= 4
+        end
 
         def unquoted_true
-          boolean_domain[:true]
+          'true'
         end
 
         def quoted_true # :nodoc:
@@ -34,7 +34,7 @@ module ActiveRecord
         end
 
         def unquoted_false
-          boolean_domain[:false]
+          'false'
         end
 
         def quoted_false # :nodoc:

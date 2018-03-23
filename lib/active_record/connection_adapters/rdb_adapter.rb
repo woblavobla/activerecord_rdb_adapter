@@ -29,14 +29,6 @@ module ActiveRecord
       include Rdb::SchemaStatements
       include Rdb::ColumnDumper
 
-      @@boolean_domain = { :true => 1, :false => 0, :name => 'BOOLEAN', :type => 'integer' }
-      cattr_reader :boolean_domain
-
-      def self.boolean_domain=(domain)
-        RdbColumn::TRUE_VALUES << domain[:true]
-        @@boolean_domain = domain
-      end
-
       @@default_transaction_isolation = :read_committed
       cattr_accessor :default_transaction_isolation
 

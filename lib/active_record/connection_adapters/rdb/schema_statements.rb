@@ -40,10 +40,9 @@ module ActiveRecord
         def columns(table_name, _name = nil)
           column_definitions(table_name).map do |field|
             field.symbolize_keys!.each {|k, v| v.rstrip! if v.is_a?(String)}
-            properties = field.values_at(:name, :default_source)
-            properties += column_type_for(field)
-            properties << !field[:null_flag]
-            RdbColumn.new(*properties, field.slice(:domain, :sub_type))
+            sql_type_metadata = column_type_for(field)
+            rdb_opt = field.slice(:domain, :sub_type)
+            RdbColumn.new(field[:name], field[:default_source], sql_type_metadata, !field[:null_flag], table_name, rdb_opt)
           end
         end
 
@@ -67,7 +66,7 @@ module ActiveRecord
             needs_sequence ||= table_def.needs_sequence
           end
 
-          commit_db_transaction
+          #commit_db_transaction
 
           return if options[:sequence] == false || !needs_sequence
           create_sequence(options[:sequence] || default_sequence_name(name))
@@ -87,6 +86,7 @@ module ActiveRecord
             END
           END_SQL
           execute(trg_sql)
+          #commit_db_transaction
         end
 
         def drop_table(name, options = {}) # :nodoc:
@@ -325,7 +325,7 @@ module ActiveRecord
            :time => {:name => 'time'},
            :date => {:name => 'date'},
            :binary => {:name => 'blob'},
-           :boolean => {:name => boolean_domain[:name]}
+           :boolean => {:name => 'boolean'}
           }
         end
 
@@ -335,7 +335,7 @@ module ActiveRecord
           if ActiveRecord::VERSION::STRING < "4.2.0"
             [sql_type]
           else
-            [lookup_cast_type(sql_type), sql_type]
+            {:type => lookup_cast_type(sql_type), :sql_type => sql_type}
           end
         end
 
