@@ -26,7 +26,7 @@ module ActiveRecord
         end
 
         def unquoted_true
-          'true'
+          'TRUE'
         end
 
         def quoted_true # :nodoc:
@@ -34,7 +34,7 @@ module ActiveRecord
         end
 
         def unquoted_false
-          'false'
+          'FALSE'
         end
 
         def quoted_false # :nodoc:

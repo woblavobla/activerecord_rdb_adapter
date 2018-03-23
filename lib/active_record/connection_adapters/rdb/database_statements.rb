@@ -86,8 +86,7 @@ module ActiveRecord
         # Returns an array of record hashes with the column names as keys and
         # column values as values. ActiveRecord >= 4 returns an ActiveRecord::Result.
         def select(sql, name = nil, binds = [])
-          result = exec_query(sql, name, binds)
-          ::ActiveRecord::VERSION::MAJOR > 3 ? result : result.to_a
+          exec_query(sql, name, binds)
         end
 
         def last_inserted_id(_result)
@@ -97,7 +96,7 @@ module ActiveRecord
         private
         def translate_and_log(sql, binds = [], name = nil)
           values = []
-          values = binds.map {|bind| type_cast(bind.value, bind)} if ActiveRecord::VERSION::STRING >= '5.0.0'
+          values = binds.map {|bind| type_cast(bind.value, bind)}
 
           if sql =~ /(CREATE TABLE|ALTER TABLE)/
             sql.gsub!(/(\@BINDDATE|BINDDATE\@)/m, '\'')

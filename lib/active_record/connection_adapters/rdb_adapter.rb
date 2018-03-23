@@ -89,6 +89,30 @@ module ActiveRecord
         1499
       end
 
+      def combine_bind_parameters(
+          from_clause: [],
+          join_clause: [],
+          where_clause: [],
+          having_clause: [],
+          limit: nil,
+          offset: nil
+      ) # :nodoc:
+        result = from_clause + join_clause + where_clause + having_clause
+        if limit && !offset
+          result << limit
+        end
+        if offset && !limit
+          result = [offset] + result
+        end
+        if offset && limit
+          offset = offset.class.new(offset.name, offset.value + 1, offset.type)
+          limit = limit.class.new(limit.name, limit.value + offset.value, limit.type)
+          result << offset
+          result << limit
+        end
+        result
+      end
+
       def active?
         return false unless @connection.open?
         # return true if @connection.transaction_started
