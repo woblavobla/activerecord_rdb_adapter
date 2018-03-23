@@ -25,7 +25,6 @@ module ActiveRecord
             end
             next result unless result.respond_to?(:map)
             cols = result.map {|col| col.name}
-            commit_db_transaction
             ActiveRecord::Result.new(cols, rows)
           end
         end
