@@ -3,6 +3,20 @@ module ActiveRecord
     module Rdb
       module SchemaStatements
 
+        methods_to_commit = [:add_column,
+                             :create_table,
+                             :rename_column,
+                             :remove_column,
+                             :change_column,
+                             :change_column_default,
+                             :change_column_null,
+                             :remove_index,
+                             :remove_index!,
+                             :drop_table,
+                             :create_sequence,
+                             :drop_sequence,
+                             :drop_trigger]
+
         def native_database_types
           @native_database_types ||= initialize_native_database_types.freeze
         end
@@ -377,6 +391,23 @@ module ActiveRecord
         def squish_sql(sql)
           sql.strip.gsub(/\s+/, ' ')
         end
+
+        class << self
+          def after(*names)
+            names.flatten.each do |name|
+              m = ActiveRecord::ConnectionAdapters::Rdb::SchemaStatements.instance_method(name)
+              define_method(name) do |*args, &block|
+                m.bind(self).(*args, &block)
+                yield
+                commit_db_transaction
+              end
+            end
+          end
+        end
+
+        after(methods_to_commit) {
+          puts "Commiting transaction"
+        }
 
       end
     end
