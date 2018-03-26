@@ -105,8 +105,8 @@ module ActiveRecord
           result = [offset] + result
         end
         if offset && limit
-          offset = offset.class.new(offset.name, offset.value + 1, offset.type)
           limit = limit.class.new(limit.name, limit.value + offset.value, limit.type)
+          offset = offset.class.new(offset.name, offset.value + 1, offset.type)
           result << offset
           result << limit
         end
