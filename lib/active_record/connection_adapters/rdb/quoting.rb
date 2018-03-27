@@ -45,6 +45,14 @@ module ActiveRecord
           lookup_cast_type(column.try(:sql_type) || column.try(:type))
         end
 
+        def type_casted_binds(binds) # :nodoc:
+          if binds.first.is_a?(Array)
+            binds.map { |column, value| type_cast(value, column) }
+          else
+            binds.map { |attr| type_cast(attr.value_for_database, attr) }
+          end
+        end
+
         private
         def id_value_for_database(value)
           if primary_key = value.class.primary_key
