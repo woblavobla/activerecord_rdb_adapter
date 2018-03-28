@@ -41,8 +41,18 @@ module ActiveRecord
           quote :false
         end
 
+        def type_cast_from_column(column, value) # :nodoc:
+          if column
+            type = column.type || lookup_cast_type_from_column(column)
+            type.serialize(value)
+          else
+            value
+          end
+        end
+
         def lookup_cast_type_from_column(column) # :nodoc:
-          lookup_cast_type(column.try(:sql_type) || column.try(:type))
+          type = column.try(:sql_type) || column.try(:type)
+          lookup_cast_type(type)
         end
 
         def type_casted_binds(binds) # :nodoc:
