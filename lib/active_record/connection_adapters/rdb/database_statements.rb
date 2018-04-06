@@ -114,7 +114,7 @@ module ActiveRecord
             end
           end
 
-          log(sql, name, binds) {yield [sql, *values]}
+          log(sql, name, binds, values) {yield [sql, *values]}
         end
       end
     end
