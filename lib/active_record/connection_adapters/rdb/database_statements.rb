@@ -95,7 +95,6 @@ module ActiveRecord
 
         private
         def translate_and_log(sql, binds = [], name = nil)
-          values = []
           values = binds.map {|bind| type_cast(bind.value, bind)}
 
           if sql =~ /(CREATE TABLE|ALTER TABLE)/
