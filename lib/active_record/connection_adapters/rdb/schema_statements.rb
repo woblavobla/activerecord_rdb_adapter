@@ -207,8 +207,8 @@ module ActiveRecord
           execute(squish_sql(<<-end_sql))
             UPDATE RDB$RELATION_FIELDS
             SET RDB$NULL_FLAG=#{quote(null ? nil : 1)}
-            WHERE RDB$FIELD_NAME='#{ar_to_fb_case(column_name)}'
-            AND RDB$RELATION_NAME='#{ar_to_fb_case(table_name)}'
+            WHERE RDB$FIELD_NAME='#{ar_to_rdb_case(column_name)}'
+            AND RDB$RELATION_NAME='#{ar_to_rdb_case(table_name)}'
           end_sql
         end
 
