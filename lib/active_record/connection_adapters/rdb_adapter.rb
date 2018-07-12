@@ -46,7 +46,7 @@ module ActiveRecord
       end
 
       def valid_type?(type)
-        !native_database_types[type].nil?
+        !native_database_types[type].nil? || !native_database_types[type.type].nil?
       end
 
       def adapter_name

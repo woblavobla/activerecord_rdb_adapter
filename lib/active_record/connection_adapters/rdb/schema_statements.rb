@@ -350,12 +350,8 @@ module ActiveRecord
 
         def column_type_for(field)
           sql_type = RdbColumn.sql_type_for(field)
-
-          if ActiveRecord::VERSION::STRING < "4.2.0"
-            [sql_type]
-          else
-            {:type => lookup_cast_type(sql_type), :sql_type => sql_type}
-          end
+          type = lookup_cast_type(sql_type)
+          {:type => type, :sql_type => type.type}
         end
 
         def integer_to_sql(limit)
