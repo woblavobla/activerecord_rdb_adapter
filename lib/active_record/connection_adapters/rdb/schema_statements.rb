@@ -177,7 +177,7 @@ module ActiveRecord
             copy_column = 'c_temp'
             add_column table_name, copy_column, type, options
             execute(squish_sql(<<-end_sql))
-            UPDATE #{table_name} SET #{copy_column} = #{column_name};
+            UPDATE #{table_name} SET #{copy_column.quote_column_name} = #{column_name.to_s.quote_column_name};
             end_sql
             remove_column table_name, column_name
             rename_column table_name, copy_column, column_name
@@ -204,12 +204,20 @@ module ActiveRecord
         def change_column_null(table_name, column_name, null, default = nil)
           change_column_default(table_name, column_name, default) if default
 
+          db_column = columns(table_name).find{|c| c.name == column_name.to_s}
+          options = {:null => null}
+          options[:default] = db_column.default if !default && db_column.default
+          options[:default] = default if default
+          ar_type = db_column.type
+          type = type_to_sql(ar_type.type, ar_type.limit, ar_type.precision, ar_type.scale)
+
+          copy_column = 'c_temp'
+          add_column table_name, copy_column, type, options
           execute(squish_sql(<<-end_sql))
-            UPDATE RDB$RELATION_FIELDS
-            SET RDB$NULL_FLAG=#{quote(null ? nil : 1)}
-            WHERE RDB$FIELD_NAME='#{ar_to_rdb_case(column_name)}'
-            AND RDB$RELATION_NAME='#{ar_to_rdb_case(table_name)}'
+            UPDATE #{table_name} SET #{copy_column.quote_column_name} = #{column_name.to_s.quote_column_name};
           end_sql
+          remove_column table_name, column_name
+          rename_column table_name, copy_column, column_name
         end
 
         def rename_column(table_name, column_name, new_column_name)
@@ -266,7 +274,7 @@ module ActiveRecord
             when :blob
               binary_to_sql(limit)
             when :string
-              text_to_sql(limit)
+              string_to_sql(limit)
             else
               type = type.to_sym if type
               if native = native_database_types[type]
@@ -373,7 +381,15 @@ module ActiveRecord
           if limit && limit > 0
             "VARCHAR(#{limit})"
           else
-            "VARCHAR(100)"
+            "BLOB SUB_TYPE TEXT"
+          end
+        end
+
+        def string_to_sql(limit)
+          if limit && limit > 0
+            "VARCHAR(#{limit})"
+          else
+            "VARCHAR(150)"
           end
         end
 
