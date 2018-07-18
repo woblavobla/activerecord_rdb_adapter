@@ -88,16 +88,15 @@ module Arel
       end
 
       def visit_Arel_Nodes_Offset o, collector
-        collector << " SKIP ?"
-        collector << SPACE
+        collector << " SKIP "
+        visit o.expr, collector
       end
 
       def limit_with_rows o, collector
-        o = o.dup
-        limit = o.limit.expr
-        offset = o.offset
+        limit = o.limit.expr.value
+        offset = o.offset.expr.value
         collector << " ROWS "
-        collector.add_bind(offset.expr) {|i| "?"}
+        collector.add_bind(offset) {|i| "?"}
         collector << " TO "
         collector.add_bind(limit) {|i| "?"}
       end

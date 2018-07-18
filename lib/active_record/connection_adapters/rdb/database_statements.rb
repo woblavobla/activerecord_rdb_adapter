@@ -9,6 +9,10 @@ module ActiveRecord
           exec_query(sql, name, binds).to_a.map(&:values)
         end
 
+        def select_all(*)
+          super
+        end
+
         def execute(sql, name = nil)
           translate_and_log(sql, [], name) do |args|
             @connection.execute(*args)

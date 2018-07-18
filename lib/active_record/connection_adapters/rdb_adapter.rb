@@ -18,7 +18,9 @@ require 'active_record/connection_adapters/rdb/quoting'
 require 'active_record/connection_adapters/rdb_column'
 require 'active_record/rdb_base'
 
-require 'active_record/connection_adapters/rdb/core_ext/relation'
+#require 'active_record/connection_adapters/rdb/core_ext/relation'
+require 'active_record/connection_adapters/rdb/core_ext/finder_methods'
+require 'active_record/connection_adapters/rdb/core_ext/query_methods'
 
 module ActiveRecord
   module ConnectionAdapters
