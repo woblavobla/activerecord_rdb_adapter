@@ -102,7 +102,7 @@ module ActiveRecord
           values = binds.map {|bind| type_cast(bind.value, bind)}
 
           if sql =~ /(CREATE TABLE|ALTER TABLE)/
-            sql.gsub!(/(\@BINDDATE|BINDDATE\@)/m, '\'')
+            sql.dup.gsub!(/(\@BINDDATE|BINDDATE\@)/m, '\'')
           else
             if sql.is_a?(String)
               sql.dup.gsub!(/\@BINDBINARY(.*?)BINDBINARY\@/m) do |extract|
