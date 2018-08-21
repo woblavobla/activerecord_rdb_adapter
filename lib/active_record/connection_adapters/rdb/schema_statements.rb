@@ -170,6 +170,10 @@ module ActiveRecord
           super if column_exist
         end
 
+        def remove_column_for_alter(table_name, column_name, type = nil, options = {})
+          "DROP #{quote_column_name(column_name)}"
+        end
+
         def change_column(table_name, column_name, type, options = {})
           type_sql = type_to_sql(type, *options.values_at(:limit, :precision, :scale))
 
