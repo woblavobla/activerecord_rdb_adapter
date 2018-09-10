@@ -11,7 +11,7 @@ ActiveRecord::Relation.class_eval do
       arel.where(where_clause.ast) unless where_clause.empty?
       arel.having(having_clause.ast) unless having_clause.empty?
       if !self.limit_value.nil? && !self.offset_value.nil?
-        self.offset_value += 1
+        self.offset_value += 1 if self.offset_value != 1
         self.limit_value += (self.offset_value - 1)
       end
       if limit_value
