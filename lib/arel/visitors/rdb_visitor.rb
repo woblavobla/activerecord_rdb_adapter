@@ -93,8 +93,14 @@ module Arel
       end
 
       def limit_with_rows o, collector
-        limit = o.limit.expr.value
+        o.offset.expr.value = ActiveModel::Attribute.with_cast_value("OFFSET".freeze,
+                                                                     o.offset.expr.value.value + 1,
+                                                                     ActiveModel::Type.default_value)
         offset = o.offset.expr.value
+        o.limit.expr.value = ActiveModel::Attribute.with_cast_value("LIMIT".freeze,
+                                                                    (o.limit.expr.value.value) + (offset.value - 1),
+                                                                    ActiveModel::Type.default_value)
+        limit = o.limit.expr.value
         collector << " ROWS "
         collector.add_bind(offset) {|i| "?"}
         collector << " TO "
