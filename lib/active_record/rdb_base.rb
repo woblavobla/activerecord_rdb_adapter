@@ -30,6 +30,7 @@ module ActiveRecord
       #config[:charset] = config[:charset].gsub(/-/, '') if config[:charset]
       #config[:encoding] = config[:encoding].gsub(/-/, '') if config[:encoding]
       config[:page_size] = 8192 unless config[:page_size]
+      config[:readonly_selects] = true unless config[:readonly_selects].present?
       config
     end
   end
