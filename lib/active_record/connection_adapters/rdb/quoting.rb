@@ -1,7 +1,14 @@
+# frozen_string_literal: true
 module ActiveRecord
   module ConnectionAdapters
     module Rdb
       module Quoting
+
+        QUOTED_FALSE = "'false'".freeze
+        QUOTED_TRUE = "'true'".freeze
+
+        QUOTED_POSITION = '"POSITION"'.freeze
+        QUOTED_VALUE = '"VALUE"'.freeze
 
         def quote_string(string) # :nodoc:
           string.gsub(/'/, "''")
@@ -16,9 +23,12 @@ module ActiveRecord
         end
 
         def quote_column_name(column_name) # :nodoc:
-          name = column_name.to_s.gsub(/(?<=[^\"\w]|^)position(?=[^\"\w]|$)/i, '"POSITION"').gsub(/(?<=[^\"\w]|^)value(?=[^\"\w]|$)/i, '"VALUE"')
-          name = ar_to_rdb_case(name.to_s).gsub('"', '')
-          @connection.dialect == 1 ? %Q(#{name}) : %Q("#{name}")
+          column = column_name.dup.to_s
+          column.gsub!(/(?<=[^\"\w]|^)position(?=[^\"\w]|$)/i, QUOTED_POSITION)
+          column.gsub!(/(?<=[^\"\w]|^)value(?=[^\"\w]|$)/i, QUOTED_VALUE)
+          column.gsub!('"', '')
+          column.upcase!
+          @connection.dialect == 1 ? %Q(#{column}) : %Q("#{column}")
         end
 
         def quote_table_name_for_assignment(_table, attr)
@@ -30,7 +40,7 @@ module ActiveRecord
         end
 
         def quoted_true # :nodoc:
-          quote :true
+          QUOTED_TRUE
         end
 
         def unquoted_false
@@ -38,7 +48,7 @@ module ActiveRecord
         end
 
         def quoted_false # :nodoc:
-          quote :false
+          QUOTED_FALSE
         end
 
         def type_cast_from_column(column, value) # :nodoc:

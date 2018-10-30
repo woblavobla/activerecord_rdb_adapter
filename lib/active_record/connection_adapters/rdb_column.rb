@@ -26,7 +26,9 @@ module ActiveRecord
 
       def initialize(name, default, sql_type_metadata = nil, null = true, table_name = nil, rdb_options = {})
         @domain, @sub_type = rdb_options.values_at(:domain, :sub_type)
-        super(name.downcase, parse_default(default), sql_type_metadata, null, table_name)
+        name = name.dup
+        name.downcase!
+        super(name.freeze, parse_default(default), sql_type_metadata, null, table_name)
       end
 
       def sql_type
@@ -53,7 +55,10 @@ module ActiveRecord
 
       def parse_default(default)
         return if default.nil? || default =~ /null/i
-        default.gsub(/^\s*DEFAULT\s+/i, '').gsub(/(^'|'$)/, '')
+        d = default.dup
+        d.gsub!(/^\s*DEFAULT\s+/i, '')
+        d.gsub!(/(^'|'$)/, '')
+        d
       end
 
       def simplified_type(field_type)
