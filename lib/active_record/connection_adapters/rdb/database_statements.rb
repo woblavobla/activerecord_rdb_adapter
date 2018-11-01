@@ -36,8 +36,10 @@ module ActiveRecord
         # the executed +sql+ statement.
         def exec_query(sql, name = 'SQL', binds = [])
           translate_and_log(sql, binds, name) do |args|
-            result, rows = @connection.execute(*args) do |cursor|
-              [cursor.fields, cursor.fetchall]
+            result, rows = ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+              @connection.execute(*args) do |cursor|
+                [cursor.fields, cursor.fetchall]
+              end
             end
             next result unless result.respond_to?(:map)
             cols = result.map {|col| col.name.freeze}
