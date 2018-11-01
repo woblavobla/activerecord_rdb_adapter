@@ -15,8 +15,20 @@ module ActiveRecord
 
         def execute(sql, name = nil)
           translate_and_log(sql, [], name) do |args|
+            ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+              @connection.execute(*args)
+            end
+          end
+        end
+
+        def execute_with_args(*args)
+          ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
             @connection.execute(*args)
           end
+        end
+
+        def execute_and_free(*args)
+          yield execute_with_args(*args)
         end
 
         # Executes +sql+ statement in the context of this connection using
@@ -24,11 +36,11 @@ module ActiveRecord
         # the executed +sql+ statement.
         def exec_query(sql, name = 'SQL', binds = [])
           translate_and_log(sql, binds, name) do |args|
-            result, rows = @connection.execute(*args) do |cursor|
+            result, rows = execute_and_free(*args) do |cursor|
               [cursor.fields, cursor.fetchall]
             end
             next result unless result.respond_to?(:map)
-            cols = result.map {|col| col.name}
+            cols = result.map {|col| col.name.freeze}
             ActiveRecord::Result.new(cols, rows)
           end
         end
@@ -98,6 +110,7 @@ module ActiveRecord
         end
 
         private
+
         def translate_and_log(sql, binds = [], name = nil)
           values = binds.map {|bind| type_cast(bind.value, bind)}
 
