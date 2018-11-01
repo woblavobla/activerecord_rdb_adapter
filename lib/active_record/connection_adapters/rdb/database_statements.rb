@@ -36,7 +36,7 @@ module ActiveRecord
         # the executed +sql+ statement.
         def exec_query(sql, name = 'SQL', binds = [])
           translate_and_log(sql, binds, name) do |args|
-            result, rows = execute_and_free(*args) do |cursor|
+            result, rows = @connection.execute(*args) do |cursor|
               [cursor.fields, cursor.fetchall]
             end
             next result unless result.respond_to?(:map)
