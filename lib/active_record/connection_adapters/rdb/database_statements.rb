@@ -35,12 +35,12 @@ module ActiveRecord
         # +binds+ as the bind substitutes. +name+ is logged along with
         # the executed +sql+ statement.
         def exec_query(sql, name = 'SQL', binds = [])
-          retries_count = 0
+          retries_count = 5
           begin
             exec_query_to_db(binds, name, sql)
           rescue StandardError => e
-            retries_count += 1
-            retry if retries_count < 5
+            retries_count -= 1
+            retry if retries_count > 0
             raise e
           end
         end
