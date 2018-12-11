@@ -35,15 +35,13 @@ module ActiveRecord
         # +binds+ as the bind substitutes. +name+ is logged along with
         # the executed +sql+ statement.
         def exec_query(sql, name = 'SQL', binds = [])
-          translate_and_log(sql, binds, name) do |args|
-            result, rows = ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
-              @connection.execute(*args) do |cursor|
-                [cursor.fields, cursor.fetchall]
-              end
-            end
-            next result unless result.respond_to?(:map)
-            cols = result.map {|col| col.name.freeze}
-            ActiveRecord::Result.new(cols, rows)
+          retries_count = 0
+          begin
+            exec_query_to_db(binds, name, sql)
+          rescue StandardError => e
+            retries_count += 1
+            retry if retries_count < 5
+            raise e
           end
         end
 
@@ -112,6 +110,19 @@ module ActiveRecord
         end
 
         private
+
+        def exec_query_to_db(binds, name, sql)
+          translate_and_log(sql, binds, name) do |args|
+            result, rows = ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+              @connection.execute(*args) do |cursor|
+                [cursor.fields, cursor.fetchall]
+              end
+            end
+            next result unless result.respond_to?(:map)
+            cols = result.map {|col| col.name.freeze}
+            ActiveRecord::Result.new(cols, rows)
+          end
+        end
 
         def translate_and_log(sql, binds = [], name = nil)
           values = binds.map {|bind| type_cast(bind.value, bind)}
