@@ -21,10 +21,9 @@ module ActiveRecord
         def columns(table_name, _name = nil)
           @col_definitions ||= {}
           @col_definitions[table_name] ||= column_definitions(table_name).map do |field|
-            field.symbolize_keys!.each { |_k, v| v.rstrip! if v.is_a?(String) }
             sql_type_metadata = column_type_for(field)
-            rdb_opt = field.slice(:domain, :sub_type)
-            RdbColumn.new(field[:name], field[:default_source], sql_type_metadata, !field[:null_flag], table_name, rdb_opt)
+            rdb_opt = { domain: field[:domain], sub_type: field[:sql_subtype] }
+            RdbColumn.new(field[:name], field[:default], sql_type_metadata, field[:nullable], table_name, rdb_opt)
           end
         end
 
@@ -72,7 +71,7 @@ module ActiveRecord
             drop = !execute(squish_sql(<<-END_SQL))
             select 1 from rdb$relations where rdb$relation_name = #{quote_table_name(name).tr('"', '\'')}
             END_SQL
-                   .fetchall.empty?
+                   .empty?
           end
 
           trigger_name = "N$#{name.upcase}"
@@ -108,7 +107,7 @@ module ActiveRecord
             from rdb$triggers
              where rdb$trigger_name = '#{trigger_name}'
           END_SQL
-            .fetchall.empty?
+            .empty?
         end
 
         def add_column(table_name, column_name, type, options = {})
@@ -138,7 +137,7 @@ module ActiveRecord
           select 1 from RDB$RELATION_FIELDS rf
             where lower(rf.RDB$RELATION_NAME) = '#{table_name.downcase}' and lower(rf.RDB$FIELD_NAME) = '#{column_name.downcase}'
           END_SQL
-                         .fetchall.empty?
+                         .empty?
           super if column_exist
         end
 

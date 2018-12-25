@@ -3,16 +3,15 @@ module ActiveRecord
     class RdbColumn < Column
       class << self
         def sql_type_for(field)
-          type = field[:type]
-          sub_type = field[:sub_type]
+          sql_type = field[:sql_type]
+          sub_type = field[:sql_subtype]
           domain = field[:domain]
-          sql_type = ::Fb::SqlType.from_code(type, sub_type || 0).downcase
 
           sql_type << case sql_type
-                      when /(numeric|decimal)/
+                      when /(numeric|decimal)/i
                         "(#{field[:precision]},#{field[:scale].abs})"
-                      when /(int|float|double|char|varchar|bigint)/
-                        "(#{field[:limit]})"
+                      when /(int|float|double|char|varchar|bigint)/i
+                        "(#{field[:length]})"
                       else
                         ''
                       end
