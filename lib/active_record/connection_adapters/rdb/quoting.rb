@@ -117,11 +117,11 @@ module ActiveRecord
         end
 
         def rdb_to_ar_case(column_name)
-          column_name =~ /[[:lower:]]/ ? column_name : column_name.downcase
+          /[[:lower:]]/.match?(column_name) ? column_name : column_name.downcase
         end
 
         def ar_to_rdb_case(column_name)
-          column_name =~ /[[:upper:]]/ ? column_name : column_name.upcase
+          /[[:upper:]]/.match?(column_name) ? column_name : column_name.upcase
         end
 
         def encode_hash(value)
@@ -133,12 +133,12 @@ module ActiveRecord
         end
 
         if defined? Encoding
-          def decode(s)
-            Base64.decode64(s).force_encoding(@connection.encoding)
+          def decode(str)
+            Base64.decode64(str).force_encoding(@connection.encoding)
           end
         else
-          def decode(s)
-            Base64.decode64(s)
+          def decode(str)
+            Base64.decode64(str)
           end
         end
       end
