@@ -9,18 +9,15 @@ require 'active_record/base'
 require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/connection_adapters/rdb/database_statements'
 require 'active_record/connection_adapters/rdb/database_limits'
-require 'active_record/connection_adapters/rdb/database_tasks'
 require 'active_record/connection_adapters/rdb/schema_creation'
 require 'active_record/connection_adapters/rdb/schema_dumper'
 require 'active_record/connection_adapters/rdb/schema_statements'
-require 'active_record/connection_adapters/rdb/table_definition'
 require 'active_record/connection_adapters/rdb/quoting'
-require 'active_record/connection_adapters/rdb_column'
 require 'active_record/rdb_base'
 
 #require 'active_record/connection_adapters/rdb/core_ext/relation'
-require 'active_record/connection_adapters/rdb/core_ext/finder_methods'
-require 'active_record/connection_adapters/rdb/core_ext/query_methods'
+#require 'active_record/connection_adapters/rdb/core_ext/finder_methods'
+#require 'active_record/connection_adapters/rdb/core_ext/query_methods'
 
 module ActiveRecord
   module ConnectionAdapters
@@ -91,14 +88,12 @@ module ActiveRecord
         1499
       end
 
-      def combine_bind_parameters(
-          from_clause: [],
-          join_clause: [],
-          where_clause: [],
-          having_clause: [],
-          limit: nil,
-          offset: nil
-      ) # :nodoc:
+      def combine_bind_parameters(from_clause: [],
+                                  join_clause: [],
+                                  where_clause: [],
+                                  having_clause: [],
+                                  limit: nil,
+                                  offset: nil) # :nodoc:
         result = from_clause + join_clause + where_clause + having_clause
         if limit && !offset
           result << limit
@@ -164,17 +159,16 @@ module ActiveRecord
 
       def translate_exception(e, message)
         case e.message
-          when /violation of FOREIGN KEY constraint/
-            InvalidForeignKey.new(message)
-          when /violation of PRIMARY or UNIQUE KEY constraint/, /attempt to store duplicate value/
-            RecordNotUnique.new(message)
-          when /This operation is not defined for system tables/
-            ActiveRecordError.new(message)
-          else
-            super
+        when /violation of FOREIGN KEY constraint/
+          ActiveRecord::InvalidForeignKey.new(message)
+        when /violation of PRIMARY or UNIQUE KEY constraint/, /attempt to store duplicate value/
+          ActiveRecord::RecordNotUnique.new(message)
+        when /This operation is not defined for system tables/
+          ActiveRecord::ActiveRecordError.new(message)
+        else
+          super
         end
       end
-
     end
   end
 end

@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.author = "Andrey Lobanov (RedSoft)"
   s.name = "activerecord-rdb-adapter"
-  s.version = "0.2.1"
+  s.version = "0.3.1"
   s.date = "2018-03-06"
   s.summary = "ActiveRecord Firebird and RedDatabase Adapter"
-  s.description = "ActiveRecord Firebird and RedDatabase Adapter for Rails 4+"
+  s.description = "ActiveRecord Firebird and RedDatabase Adapter for Rails 5+"
   s.licenses = ["MIT"]
   s.requirements = "Firebird library fb"
   s.require_paths = ['lib']
@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.has_rdoc = false
   s.files = Dir['README.md', 'lib/**/*']
 
-  s.add_dependency 'fb', '>= 0.8.0'
-  s.add_dependency 'activerecord', '>= 4.1.0'
+  s.add_dependency 'fb', '>= 0.9.0'
+
+  s.add_dependency 'rails', '~> 5.1'
 end

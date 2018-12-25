@@ -1,5 +1,3 @@
-
-
 module ActiveRecord
   module ConnectionHandling
     def rdb_connection(config)

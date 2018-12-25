@@ -1,9 +1,7 @@
-# frozen_string_literal: true
 module ActiveRecord
   module ConnectionAdapters
     module Rdb
       module Quoting
-
         QUOTED_FALSE = "'false'".freeze
         QUOTED_TRUE = "'true'".freeze
 
@@ -16,9 +14,9 @@ module ActiveRecord
 
         def quoted_date(time)
           if time.is_a?(Time) || time.is_a?(DateTime)
-            time.localtime.strftime("%d.%m.%Y %H:%M:%S")
+            time.localtime.strftime('%d.%m.%Y %H:%M:%S')
           else
-            time.strftime("%d.%m.%Y")
+            time.strftime('%d.%m.%Y')
           end
         end
 
@@ -26,9 +24,9 @@ module ActiveRecord
           column = column_name.dup.to_s
           column.gsub!(/(?<=[^\"\w]|^)position(?=[^\"\w]|$)/i, QUOTED_POSITION)
           column.gsub!(/(?<=[^\"\w]|^)value(?=[^\"\w]|$)/i, QUOTED_VALUE)
-          column.gsub!('"', '')
+          column.delete!('"')
           column.upcase!
-          @connection.dialect == 1 ? %Q(#{column}) : %Q("#{column}")
+          @connection.dialect == 1 ? column.to_s : %("#{column}")
         end
 
         def quote_table_name_for_assignment(_table, attr)
@@ -74,6 +72,7 @@ module ActiveRecord
         end
 
         private
+
         def id_value_for_database(value)
           if primary_key = value.class.primary_key
             value.instance_variable_get(:@attributes)[primary_key].value_for_database
@@ -82,40 +81,40 @@ module ActiveRecord
 
         def _quote(value)
           case value
-            when Type::Binary::Data
-              "@BINDBINARY#{Base64.encode64(value.to_s)}BINDBINARY@"
-            when Time, DateTime
-              "'#{value.strftime("%d.%m.%Y %H:%M")}'"
-            when Date
-              "'#{value.strftime("%d.%m.%Y")}'"
-            else
-              super
+          when Type::Binary::Data
+            "@BINDBINARY#{Base64.encode64(value.to_s)}BINDBINARY@"
+          when Time, DateTime
+            "'#{value.strftime('%d.%m.%Y %H:%M')}'"
+          when Date
+            "'#{value.strftime('%d.%m.%Y')}'"
+          else
+            super
           end
         end
 
         def _type_cast(value)
           case value
-            when Symbol, ActiveSupport::Multibyte::Chars, Type::Binary::Data
-              value.to_s
-            when Array
-              value.to_yaml
-            when Hash then
-              encode_hash(value)
-            when true then
-              unquoted_true
-            when false then
-              unquoted_false
+          when Symbol, ActiveSupport::Multibyte::Chars, Type::Binary::Data
+            value.to_s
+          when Array
+            value.to_yaml
+          when Hash then
+            encode_hash(value)
+          when true then
+            unquoted_true
+          when false then
+            unquoted_false
             # BigDecimals need to be put in a non-normalized form and quoted.
-            when BigDecimal then
-              value.to_s("F")
-            when Type::Time::Value then
-              quoted_time(value)
-            when Date, Time, DateTime then
-              quoted_date(value)
-            when *types_which_need_no_typecasting
-              value
-            else
-              raise TypeError
+          when BigDecimal then
+            value.to_s('F')
+          when Type::Time::Value then
+            quoted_time(value)
+          when Date, Time, DateTime then
+            quoted_date(value)
+          when *types_which_need_no_typecasting
+            value
+          else
+            raise TypeError
           end
         end
 
