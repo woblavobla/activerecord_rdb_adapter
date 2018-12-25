@@ -30,6 +30,11 @@ module ActiveRecord
           end.compact
         end
 
+        def index_name_exists?(table_name, index_name)
+          index_name = index_name.to_s.upcase
+          indexes(table_name).detect { |i| i.name.upcase == index_name }
+        end
+
         def columns(table_name, _name = nil)
           @col_definitions ||= {}
           @col_definitions[table_name] = column_definitions(table_name).map do |field|
@@ -248,8 +253,8 @@ module ActiveRecord
             float_to_sql(limit)
           when :text
             text_to_sql(limit)
-          when :blob
-            binary_to_sql(limit)
+          # when :blob
+          #   binary_to_sql(limit)
           when :string
             string_to_sql(limit)
           else
