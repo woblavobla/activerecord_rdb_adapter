@@ -81,8 +81,6 @@ module ActiveRecord
 
         def _quote(value)
           case value
-          when Type::Binary::Data
-            "@BINDBINARY#{Base64.encode64(value.to_s)}BINDBINARY@"
           when Time, DateTime
             "'#{value.strftime('%d.%m.%Y %H:%M')}'"
           when Date

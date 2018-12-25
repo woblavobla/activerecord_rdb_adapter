@@ -240,6 +240,16 @@ module ActiveRecord
           end
         end
 
+        def index_exists?(table_name, column_name, options = {})
+          column_names = Array(column_name).map(&:to_s)
+          checks = []
+          checks << lambda { |i| i.columns == column_names }
+          checks << lambda { |i| i.unique } if options[:unique]
+          checks << lambda { |i| i.name.upcase == options[:name].to_s.upcase } if options[:name]
+
+          indexes(table_name).any? { |i| checks.all? { |check| check[i] } }
+        end
+
         def type_to_sql(type, limit = nil, precision = nil, scale = nil, **args)
           if !args.nil? && !args.empty?
             limit = args[:limit] if limit.nil?
