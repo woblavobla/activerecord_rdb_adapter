@@ -16,7 +16,7 @@ module ActiveRecord
                         ''
                       end
 
-          sql_type << ' sub_type text' if sql_type =~ /blob/ && sub_type == 1
+          sql_type << ' sub_type text' if /blob/i.match?(sql_type) && sub_type == 1
           sql_type
         end
       end
@@ -53,7 +53,7 @@ module ActiveRecord
       private
 
       def parse_default(default)
-        return if default.nil? || default =~ /null/i
+        return if default.nil? || /null/i.match?(default)
         d = default.dup
         d.gsub!(/^\s*DEFAULT\s+/i, '')
         d.gsub!(/(^'|'$)/, '')
