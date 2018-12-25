@@ -3,7 +3,6 @@ require 'base64'
 require 'arel'
 require 'arel/visitors/rdb_visitor'
 
-
 require 'active_record'
 require 'active_record/base'
 require 'active_record/connection_adapters/abstract_adapter'
@@ -16,10 +15,6 @@ require 'active_record/connection_adapters/rdb/quoting'
 require 'active_record/connection_adapters/rdb/table_definition'
 require 'active_record/connection_adapters/rdb_column'
 require 'active_record/rdb_base'
-
-#require 'active_record/connection_adapters/rdb/core_ext/relation'
-#require 'active_record/connection_adapters/rdb/core_ext/finder_methods'
-#require 'active_record/connection_adapters/rdb/core_ext/query_methods'
 
 module ActiveRecord
   module ConnectionAdapters
@@ -81,7 +76,7 @@ module ActiveRecord
         true
       end
 
-      def prefetch_primary_key?(table_name = nil)
+      def prefetch_primary_key?(_table_name = nil)
         true
       end
 
@@ -89,34 +84,12 @@ module ActiveRecord
         1499
       end
 
-      def combine_bind_parameters(from_clause: [],
-                                  join_clause: [],
-                                  where_clause: [],
-                                  having_clause: [],
-                                  limit: nil,
-                                  offset: nil) # :nodoc:
-        result = from_clause + join_clause + where_clause + having_clause
-        if limit && !offset
-          result << limit
-        end
-        if offset && !limit
-          result = [offset] + result
-        end
-        if offset && limit
-          limit = limit.class.new(limit.name, limit.value + offset.value, limit.type)
-          offset = offset.class.new(offset.name, offset.value + 1, offset.type)
-          result << offset
-          result << limit
-        end
-        result
-      end
-
       def active?
         return false unless @connection.open?
         # return true if @connection.transaction_started
-        @connection.query("SELECT 1 FROM RDB$DATABASE")
+        @connection.query('SELECT 1 FROM RDB$DATABASE')
         true
-      rescue
+      rescue StandardError
         false
       end
 
@@ -127,7 +100,11 @@ module ActiveRecord
 
       def disconnect!
         super
-        @connection.close rescue nil
+        begin
+          @connection.close
+        rescue StandardError
+          nil
+        end
       end
 
       def reset!
@@ -154,8 +131,8 @@ module ActiveRecord
 
       def initialize_type_map(m)
         super
-        m.register_type %r(timestamp)i, Type::DateTime.new
-        m.alias_type %r(blob sub_type text)i, 'text'
+        m.register_type(/timestamp/i, Type::DateTime.new)
+        m.alias_type(/blob sub_type text/i, 'text')
       end
 
       def translate_exception(e, message)
