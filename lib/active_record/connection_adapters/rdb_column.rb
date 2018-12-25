@@ -1,21 +1,21 @@
 module ActiveRecord
   module ConnectionAdapters
     class RdbColumn < Column
-
       class << self
-
         def sql_type_for(field)
-          type, sub_type, domain = field.values_at(:type, :sub_type, :domain)
+          type = field[:type]
+          sub_type = field[:sub_type]
+          domain = field[:domain]
           sql_type = ::Fb::SqlType.from_code(type, sub_type || 0).downcase
 
-          case sql_type
-            when /(numeric|decimal)/
-              sql_type << "(#{field[:precision]},#{field[:scale].abs})"
-            when /(int|float|double|char|varchar|bigint)/
-              sql_type << "(#{field[:limit]})"
-            else
-              sql_type << ''
-          end
+          sql_type << case sql_type
+                      when /(numeric|decimal)/
+                        "(#{field[:precision]},#{field[:scale].abs})"
+                      when /(int|float|double|char|varchar|bigint)/
+                        "(#{field[:limit]})"
+                      else
+                        ''
+                      end
 
           sql_type << ' sub_type text' if sql_type =~ /blob/ && sub_type == 1
           sql_type
@@ -28,7 +28,7 @@ module ActiveRecord
         @domain, @sub_type = rdb_options.values_at(:domain, :sub_type)
         name = name.dup
         name.downcase!
-        super(name.freeze, parse_default(default), sql_type_metadata, null, table_name)
+        super(name, parse_default(default), sql_type_metadata, null, table_name)
       end
 
       def sql_type
@@ -66,7 +66,6 @@ module ActiveRecord
         return :text if field_type =~ /blob sub_type text/
         super
       end
-
     end
   end
 end
