@@ -2,6 +2,20 @@ module ActiveRecord
   module ConnectionAdapters
     module Rdb
       module SchemaStatements
+        methods_to_commit = %i[add_column
+                               create_table
+                               rename_column
+                               remove_column
+                               change_column
+                               change_column_default
+                               change_column_null
+                               remove_index
+                               remove_index!
+                               drop_table
+                               create_sequence
+                               drop_sequence
+                               drop_trigger]
+
         def tables(_name = nil)
           @connection.table_names
         end
@@ -12,9 +26,7 @@ module ActiveRecord
 
         def indexes(table_name, _name = nil)
           @connection.indexes.values.map do |ix|
-            if ix.table_name == table_name.to_s && ix.index_name !~ /^rdb\$/
-              IndexDefinition.new(table_name, ix.index_name, ix.unique, ix.columns)
-            end
+            IndexDefinition.new(table_name, ix.index_name, ix.unique, ix.columns) if ix.table_name == table_name.to_s && ix.index_name !~ /^rdb\$/
           end.compact
         end
 
@@ -28,13 +40,9 @@ module ActiveRecord
         end
 
         def create_table(name, options = {}) # :nodoc:
-          if options.key? :temporary
-            raise ActiveRecordError, 'Firebird does not support temporary tables'
-          end
+          raise ActiveRecordError, 'Firebird does not support temporary tables' if options.key? :temporary
 
-          if options.key? :as
-            raise ActiveRecordError, 'Firebird does not support creating tables with a select'
-          end
+          raise ActiveRecordError, 'Firebird does not support creating tables with a select' if options.key? :as
 
           drop_table name, if_exists: true if options.key? :force
 
@@ -113,9 +121,7 @@ module ActiveRecord
         def add_column(table_name, column_name, type, options = {})
           super
 
-          if type == :primary_key && options[:sequence] != false
-            create_sequence(options[:sequence] || default_sequence_name(table_name))
-          end
+          create_sequence(options[:sequence] || default_sequence_name(table_name)) if type == :primary_key && options[:sequence] != false
 
           return unless options[:position]
           # position is 1-based but add 1 to skip id column
@@ -128,9 +134,7 @@ module ActiveRecord
 
         def remove_column(table_name, column_name, type = nil, options = {})
           indexes(table_name).each do |i|
-            if i.columns.any? { |c| c == column_name.to_s }
-              remove_index! i.table, i.name
-            end
+            remove_index! i.table, i.name if i.columns.any? { |c| c == column_name.to_s }
           end
 
           column_exist = !execute(squish_sql(<<-END_SQL))
@@ -378,6 +382,23 @@ module ActiveRecord
 
         def squish_sql(sql)
           sql.strip.gsub(/\s+/, ' ')
+        end
+
+        class << self
+          def after(*names)
+            names.flatten.each do |name|
+              m = ActiveRecord::ConnectionAdapters::Rdb::SchemaStatements.instance_method(name)
+              define_method(name) do |*args, &block|
+                m.bind(self).call(*args, &block)
+                yield
+                commit_db_transaction
+              end
+            end
+          end
+        end
+
+        after(methods_to_commit) do
+          puts 'Commiting transaction'
         end
       end
     end
