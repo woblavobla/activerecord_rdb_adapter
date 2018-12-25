@@ -28,7 +28,6 @@ module ActiveRecord
       include Rdb::DatabaseStatements
       include Rdb::Quoting
       include Rdb::SchemaStatements
-      include Rdb::ColumnDumper
 
       @@default_transaction_isolation = :read_committed
       cattr_accessor :default_transaction_isolation

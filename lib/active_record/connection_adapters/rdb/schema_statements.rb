@@ -319,6 +319,10 @@ module ActiveRecord
           @native_database_types ||= initialize_native_database_types.freeze
         end
 
+        def create_schema_dumper(options)
+          Rdb::SchemaDumper.create(self, options)
+        end
+
         private
 
         def column_definitions(table_name)
