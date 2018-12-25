@@ -1,6 +1,6 @@
 module ActiveRecord
   module ConnectionAdapters
-    class RdbColumn < Column
+    class RdbColumn < Column # :nodoc:
       class << self
         def sql_type_for(field)
           sql_type = field[:sql_type]

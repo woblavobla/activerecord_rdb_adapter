@@ -1,7 +1,7 @@
 module ActiveRecord
   module ConnectionAdapters
     module Rdb
-      module Quoting
+      module Quoting # :nodoc:
         QUOTED_FALSE = "'false'".freeze
         QUOTED_TRUE = "'true'".freeze
 

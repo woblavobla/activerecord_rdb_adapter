@@ -1,7 +1,7 @@
 module ActiveRecord
   module ConnectionAdapters
     module Rdb
-      module SchemaStatements
+      module SchemaStatements # :nodoc:
         methods_to_commit = %i[add_column
                                create_table
                                rename_column

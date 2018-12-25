@@ -1,7 +1,7 @@
 module ActiveRecord
   module ConnectionAdapters
     module Rdb
-      class SchemaCreation < AbstractAdapter::SchemaCreation
+      class SchemaCreation < AbstractAdapter::SchemaCreation # :nodoc:
 
         private
 

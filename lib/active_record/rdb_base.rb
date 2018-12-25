@@ -1,5 +1,5 @@
 module ActiveRecord
-  module ConnectionHandling
+  module ConnectionHandling # :nodoc:
     def rdb_connection(config)
       require 'fb'
       config = rdb_connection_config(config)

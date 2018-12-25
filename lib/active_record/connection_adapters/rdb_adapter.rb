@@ -18,7 +18,7 @@ require 'active_record/rdb_base'
 
 module ActiveRecord
   module ConnectionAdapters
-    class RdbAdapter < AbstractAdapter
+    class RdbAdapter < AbstractAdapter # :nodoc:
       include Rdb::DatabaseLimits
       include Rdb::DatabaseStatements
       include Rdb::Quoting

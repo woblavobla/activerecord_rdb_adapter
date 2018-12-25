@@ -1,7 +1,7 @@
 module ActiveRecord
   module ConnectionAdapters
     module Rdb
-      module ColumnMethods
+      module ColumnMethods # :nodoc:
 
         attr_accessor :needs_sequence
 
@@ -12,7 +12,7 @@ module ActiveRecord
 
       end
 
-      class TableDefinition < ActiveRecord::ConnectionAdapters::TableDefinition
+      class TableDefinition < ActiveRecord::ConnectionAdapters::TableDefinition # :nodoc:
         include ColumnMethods
 
         def new_column_definition(name, type, **options)
@@ -20,7 +20,7 @@ module ActiveRecord
         end
       end
 
-      class Table < ActiveRecord::ConnectionAdapters::Table
+      class Table < ActiveRecord::ConnectionAdapters::Table # :nodoc:
         include ColumnMethods
       end
     end

@@ -2,11 +2,12 @@ require 'active_record/tasks/database_tasks'
 
 module ActiveRecord
   module Tasks
-    class RdbDatabaseTasks
-      delegate :rdb_connection_config, :establish_connection, :to => ::ActiveRecord::Base
+    class RdbDatabaseTasks # :nodoc:
+      delegate :rdb_connection_config, :establish_connection, to: ::ActiveRecord::Base
 
       def initialize(configuration, root = ::ActiveRecord::Tasks::DatabaseTasks.root)
-        @root, @configuration = root, rdb_connection_config(configuration)
+        @root = root
+        @configuration = rdb_connection_config(configuration)
       end
 
       def create
@@ -24,7 +25,11 @@ module ActiveRecord
       end
 
       def purge
-        drop rescue nil
+        begin
+          drop
+        rescue StandardError
+          nil
+        end
         create
       end
 
@@ -57,7 +62,7 @@ module ActiveRecord
         raise "Error running: #{cmd}" unless Kernel.system(cmd)
       end
 
-      def isql_create(*args)
+      def isql_create(*_args)
         cmd = "#{isql_executable} -input "
       end
 
@@ -65,17 +70,13 @@ module ActiveRecord
       # Many linux distros call this program isql-fb, instead of isql
       def isql_executable
         require 'mkmf'
-        exe = ['isql-fb', 'isql'].detect { |c| find_executable0(c) }
-        exe || abort("Unable to find isql or isql-fb in your $PATH")
+        exe = %w[isql-fb isql].detect { |c| find_executable0(c) }
+        exe || abort('Unable to find isql or isql-fb in your $PATH')
       end
 
-      def configuration
-        @configuration
-      end
+      attr_reader :configuration
 
-      def root
-        @root
-      end
+      attr_reader :root
     end
   end
 end

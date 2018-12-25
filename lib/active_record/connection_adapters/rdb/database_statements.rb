@@ -1,7 +1,7 @@
 module ActiveRecord
   module ConnectionAdapters
     module Rdb
-      module DatabaseStatements
+      module DatabaseStatements # :nodoc:
         def execute(sql, name = nil)
           log(sql, name) do
             ActiveSupport::Dependencies.interlock.permit_concurrent_loads do

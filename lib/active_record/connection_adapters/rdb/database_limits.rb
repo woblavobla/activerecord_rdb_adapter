@@ -1,7 +1,7 @@
 module ActiveRecord
   module ConnectionAdapters
     module Rdb
-      module DatabaseLimits
+      module DatabaseLimits # :nodoc:
 
         def table_alias_length
           31
