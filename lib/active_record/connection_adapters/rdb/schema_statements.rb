@@ -32,7 +32,7 @@ module ActiveRecord
 
         def columns(table_name, _name = nil)
           @col_definitions ||= {}
-          @col_definitions[table_name] ||= column_definitions(table_name).map do |field|
+          @col_definitions[table_name] = column_definitions(table_name).map do |field|
             sql_type_metadata = column_type_for(field)
             rdb_opt = { domain: field[:domain], sub_type: field[:sql_subtype] }
             RdbColumn.new(field[:name], field[:default], sql_type_metadata, field[:nullable], table_name, rdb_opt)
