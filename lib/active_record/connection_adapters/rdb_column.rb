@@ -61,8 +61,8 @@ module ActiveRecord
       end
 
       def simplified_type(field_type)
-        return :datetime if field_type =~ /timestamp/
-        return :text if field_type =~ /blob sub_type text/
+        return :datetime if /timestamp/i.match?(field_type)
+        return :text if /blob sub_type text/i.match?(field_type)
         super
       end
     end
