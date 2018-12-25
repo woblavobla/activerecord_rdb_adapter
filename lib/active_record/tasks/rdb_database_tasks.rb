@@ -63,7 +63,7 @@ module ActiveRecord
       end
 
       def isql_create(*_args)
-        cmd = "#{isql_executable} -input "
+        "#{isql_executable} -input "
       end
 
       # Finds the isql command line utility from the PATH

@@ -2,7 +2,6 @@ module ActiveRecord
   module ConnectionAdapters
     module Rdb
       module DatabaseLimits # :nodoc:
-
         def table_alias_length
           31
         end
@@ -30,7 +29,6 @@ module ActiveRecord
         def sql_query_length
           32_767
         end
-
       end
     end
   end

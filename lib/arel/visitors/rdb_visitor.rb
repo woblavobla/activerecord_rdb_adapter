@@ -1,6 +1,6 @@
 module Arel
   module Visitors
-    class Rdb < Arel::Visitors::ToSql
+    class Rdb < Arel::Visitors::ToSql # :nodoc
 
       def preparable
         false

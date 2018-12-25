@@ -5,7 +5,6 @@ module ActiveRecord
         def sql_type_for(field)
           sql_type = field[:sql_type]
           sub_type = field[:sql_subtype]
-          domain = field[:domain]
 
           sql_type << case sql_type
                       when /(numeric|decimal)/i

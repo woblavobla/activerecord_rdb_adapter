@@ -20,11 +20,9 @@ module ActiveRecord
                 fields = result.fields.map(&:name)
                 rows = result.fetchall.map do |row|
                   row.map do |col|
-                    begin
-                      col.encode('UTF-8', @connection.encoding)
-                    rescue StandardError
-                      col
-                    end
+                    col.encode('UTF-8', @connection.encoding)
+                  rescue StandardError
+                    col
                   end
                 end
                 result.close
@@ -53,9 +51,9 @@ module ActiveRecord
         # in 4.0.2+, so it's here for backward compatibility with AR 3
         def transaction_isolation_levels
           {
-              read_committed: 'READ COMMITTED',
-              repeatable_read: 'REPEATABLE READ',
-              serializable: 'SERIALIZABLE'
+            read_committed: 'READ COMMITTED',
+            repeatable_read: 'REPEATABLE READ',
+            serializable: 'SERIALIZABLE'
           }
         end
 
@@ -67,13 +65,13 @@ module ActiveRecord
 
         # Commits the transaction (and turns on auto-committing).
         def commit_db_transaction
-          log('commit transaction', nil) {@connection.commit}
+          log('commit transaction', nil) { @connection.commit }
         end
 
         # Rolls back the transaction (and turns on auto-committing). Must be
         # done if the transaction block raises an exception or returns false.
         def rollback_db_transaction
-          log('rollback transaction', nil) {@connection.rollback}
+          log('rollback transaction', nil) { @connection.rollback }
         end
 
         def default_sequence_name(table_name, _column = nil)

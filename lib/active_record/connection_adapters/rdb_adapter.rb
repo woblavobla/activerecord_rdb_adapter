@@ -129,10 +129,10 @@ module ActiveRecord
 
       protected
 
-      def initialize_type_map(m)
+      def initialize_type_map(map)
         super
-        m.register_type(/timestamp/i, Type::DateTime.new)
-        m.alias_type(/blob sub_type text/i, 'text')
+        map.register_type(/timestamp/i, Type::DateTime.new)
+        map.alias_type(/blob sub_type text/i, 'text')
       end
 
       def translate_exception(e, message)
