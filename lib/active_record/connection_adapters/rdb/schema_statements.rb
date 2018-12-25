@@ -19,6 +19,7 @@ module ActiveRecord
         end
 
         def columns(table_name, _name = nil)
+          @col_definitions ||= {}
           @col_definitions[table_name] ||= column_definitions(table_name).map do |field|
             field.symbolize_keys!.each { |_k, v| v.rstrip! if v.is_a?(String) }
             sql_type_metadata = column_type_for(field)
