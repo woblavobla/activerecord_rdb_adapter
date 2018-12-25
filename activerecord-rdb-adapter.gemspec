@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.has_rdoc = false
   s.files = Dir['README.md', 'lib/**/*']
 
-  s.add_dependency 'fb', '>= 0.9.0'
+  s.add_dependency 'fb', '>= 0.9.1'
 
   s.add_dependency 'rails', '~> 5.1'
 end
