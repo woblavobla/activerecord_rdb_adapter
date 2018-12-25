@@ -30,7 +30,7 @@ module ActiveRecord
         def visit_TableDefinition(o)
           create_sql = "CREATE#{' TEMPORARY' if o.temporary} TABLE #{quote_table_name(o.name)} "
 
-          statements = o.columns.map { |c| accept c }
+          statements = o.columns.map(&method(:accept))
           statements << accept(o.primary_keys) if o.primary_keys
 
           if supports_indexes_in_create?

@@ -70,7 +70,7 @@ module ActiveRecord
       # Many linux distros call this program isql-fb, instead of isql
       def isql_executable
         require 'mkmf'
-        exe = %w[isql-fb isql].detect { |c| find_executable0(c) }
+        exe = %w[isql-fb isql].detect(&method(:find_executable0))
         exe || abort('Unable to find isql or isql-fb in your $PATH')
       end
 

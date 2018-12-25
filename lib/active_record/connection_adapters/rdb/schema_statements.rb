@@ -244,7 +244,7 @@ module ActiveRecord
           column_names = Array(column_name).map(&:to_s)
           checks = []
           checks << lambda { |i| i.columns == column_names }
-          checks << lambda { |i| i.unique } if options[:unique]
+          checks << lambda(&:unique) if options[:unique]
           checks << lambda { |i| i.name.upcase == options[:name].to_s.upcase } if options[:name]
 
           indexes(table_name).any? { |i| checks.all? { |check| check[i] } }
