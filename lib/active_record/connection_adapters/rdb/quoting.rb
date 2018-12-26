@@ -22,8 +22,8 @@ module ActiveRecord
 
         def quote_column_name(column_name) # :nodoc:
           column = column_name.dup.to_s
-          column.gsub!(/(?<=[^\"\w]|^)position(?=[^\"\w]|$)/i, QUOTED_POSITION)
-          column.gsub!(/(?<=[^\"\w]|^)value(?=[^\"\w]|$)/i, QUOTED_VALUE)
+          column.gsub!(/(?<=[^"\w]|^)position(?=[^"\w]|$)/i, QUOTED_POSITION)
+          column.gsub!(/(?<=[^"\w]|^)value(?=[^"\w]|$)/i, QUOTED_VALUE)
           column.delete!('"')
           column.upcase!
           @connection.dialect == 1 ? column.to_s : %("#{column}")
