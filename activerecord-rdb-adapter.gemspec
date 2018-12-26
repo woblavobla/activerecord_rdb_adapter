@@ -10,7 +10,6 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.email = 'andrey.lobanov@red-soft.ru'
   s.homepage = 'http://gitlab.red-soft.biz/andrey.lobanov/activerecord-rdb-adapter'
-  s.has_rdoc = false
   s.files = Dir['README.md', 'lib/**/*']
 
   s.add_dependency 'fb', '~> 0.9'
