@@ -80,12 +80,14 @@ module ActiveRecord
 
         def drop_table(name, options = {}) # :nodoc:
           drop_sql = "DROP TABLE #{quote_table_name(name)}"
-          if options[:if_exists]
-            drop = !execute(squish_sql(<<-END_SQL))
-            select 1 from rdb$relations where rdb$relation_name = #{quote_table_name(name).tr('"', '\'')}
-            END_SQL
-                   .empty?
-          end
+          drop = if options[:if_exists]
+                   !execute(squish_sql(<<-END_SQL))
+          select 1 from rdb$relations where rdb$relation_name = #{quote_table_name(name).tr('"', '\'')}
+                   END_SQL
+                        .empty?
+                 else
+                   false
+                 end
 
           trigger_name = "N$#{name.upcase}"
           drop_trigger(trigger_name) if trigger_exists?(trigger_name)
@@ -269,7 +271,8 @@ module ActiveRecord
             string_to_sql(limit)
           else
             type = type.to_sym if type
-            if native = native_database_types[type]
+            native = native_database_types[type]
+            if native
               column_type_sql = (native.is_a?(Hash) ? native[:name] : native).dup
 
               if type == :decimal # ignore limit, use precision and scale

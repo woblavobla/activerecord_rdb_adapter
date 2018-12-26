@@ -74,7 +74,8 @@ module ActiveRecord
         private
 
         def id_value_for_database(value)
-          if primary_key = value.class.primary_key
+          primary_key = value.class.primary_key
+          if primary_key
             value.instance_variable_get(:@attributes)[primary_key].value_for_database
           end
         end
