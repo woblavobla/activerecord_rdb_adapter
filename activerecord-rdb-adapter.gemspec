@@ -3,13 +3,13 @@ Gem::Specification.new do |s|
   s.name = 'activerecord-rdb-adapter'
   s.version = '0.7.1'
   s.date = '2018-03-06'
-  s.summary = 'ActiveRecord Firebird and RedDatabase Adapter'
-  s.description = 'ActiveRecord Firebird and RedDatabase Adapter for Rails 5+'
+  s.summary = 'ActiveRecord RedDatabase 3+ and Firebird 3+ Adapter'
+  s.description = 'ActiveRecord RedDatabase 3+ and Firebird 3+ Adapter for Rails 5+'
   s.licenses = ['MIT']
   s.requirements = 'Firebird library fb'
   s.require_paths = ['lib']
   s.email = 'andrey.lobanov@red-soft.ru'
-  s.homepage = 'http://gitlab.red-soft.biz/andrey.lobanov/activerecord-rdb-adapter'
+  s.homepage = 'https://github.com/woblavobla/activerecord_rdb_adapter'
   s.files = Dir['README.md', 'lib/**/*']
 
   s.add_dependency 'fb', '~> 0.9'
