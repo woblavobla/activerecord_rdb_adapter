@@ -52,7 +52,11 @@ module ActiveRecord
         def type_cast_from_column(column, value) # :nodoc:
           if column
             type = column.type || lookup_cast_type_from_column(column)
-            type.serialize(value)
+            if type.is_a?(ActiveRecord::Type::Serialized)
+              value
+            else
+              type.serialize(value)
+            end
           else
             value
           end
