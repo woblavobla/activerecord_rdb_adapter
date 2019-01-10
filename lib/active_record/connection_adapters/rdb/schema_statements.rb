@@ -163,7 +163,7 @@ module ActiveRecord
             copy_column = 'c_temp'
             add_column table_name, copy_column, type, options
             execute(squish_sql(<<-END_SQL))
-            UPDATE #{table_name} SET #{copy_column.quote_column_name} = #{column_name.to_s.quote_column_name};
+            UPDATE #{table_name} SET #{quote_column_name(copy_column)} = #{quote_column_name(column_name)};
             END_SQL
             remove_column table_name, column_name
             rename_column table_name, copy_column, column_name
@@ -198,7 +198,7 @@ module ActiveRecord
           copy_column = 'c_temp'
           add_column table_name, copy_column, type, options
           execute(squish_sql(<<-END_SQL))
-            UPDATE #{table_name} SET #{copy_column.quote_column_name} = #{column_name.to_s.quote_column_name};
+            UPDATE #{table_name} SET #{quote_column_name(copy_column)} = #{quote_column_name(column_name)};
           END_SQL
           remove_column table_name, column_name
           rename_column table_name, copy_column, column_name
