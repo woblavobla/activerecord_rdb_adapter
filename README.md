@@ -2,4 +2,6 @@ ActiveRecord adapter that allows you to use ActiveRecord 5+(**Rails 5.2 is recom
 
 [![Gem Version](https://badge.fury.io/rb/activerecord-rdb-adapter.svg)](https://badge.fury.io/rb/activerecord-rdb-adapter)
 
-inspired by https://github.com/rowland/activerecord-fb-adapter and https://github.com/FabioMR/firebird_adapter
+GUI Database Editor for RedDatabase: [RedExpert](http://reddatabase.ru/downloads/redexpert/)
+
+inspired by [activerecord-fb-adapter](https://github.com/rowland/activerecord-fb-adapter) and [firebird_adapter](https://github.com/FabioMR/firebird_adapter)
