@@ -116,6 +116,10 @@ module ActiveRecord
           nil
         end
 
+        def sequence_exists?(sequence_name)
+          @connection.generator_names.include?(sequence_name)
+        end
+
         def trigger_exists?(trigger_name)
           !execute(squish_sql(<<-END_SQL))
             select 1
@@ -392,10 +396,6 @@ module ActiveRecord
             date: { name: 'date' },
             binary: { name: 'blob' },
             boolean: { name: 'boolean' } }
-        end
-
-        def sequence_exists?(sequence_name)
-          @connection.generator_names.include?(sequence_name)
         end
 
         def create_table_definition(*args)
