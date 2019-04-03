@@ -34,6 +34,7 @@ module ActiveRecord
         # Our Responsibility
         @config = config
         @visitor = Arel::Visitors::Rdb.new self
+        @prepared_statements = false unless config.key?(:prepared_statements)
       end
 
       def arel_visitor
