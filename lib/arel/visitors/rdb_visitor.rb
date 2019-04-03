@@ -1,11 +1,6 @@
 module Arel
   module Visitors
     class Rdb < Arel::Visitors::ToSql # :nodoc
-
-      def preparable
-        false
-      end
-
       private
 
       def visit_Arel_Nodes_SelectStatement o, collector
