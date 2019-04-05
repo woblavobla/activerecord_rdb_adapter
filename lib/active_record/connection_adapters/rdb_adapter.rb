@@ -35,6 +35,7 @@ module ActiveRecord
         @config = config
         @visitor = Arel::Visitors::Rdb.new self
         @prepared_statements = true
+        @visitor.extend(DetermineIfPreparableVisitor)
       end
 
       def arel_visitor
