@@ -87,10 +87,6 @@ module Arel
         visit o.expr, collector
       end
 
-      def visit_Arel_Nodes_BindParam o, collector
-        collector.add_bind(o.value) { '?' }
-      end
-
       def limit_with_rows o, collector
         o.offset.expr.value = ActiveModel::Attribute.with_cast_value("OFFSET".freeze,
                                                                      o.offset.expr.value.value + 1,
