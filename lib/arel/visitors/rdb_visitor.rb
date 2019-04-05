@@ -88,7 +88,11 @@ module Arel
       end
 
       def visit_Arel_Nodes_BindParam o, collector
-        collector.send('delegate').add_bind(o.value) { '?' }
+        if collector.is_a?(Arel::Collectors::SubstituteBinds)
+          collector.send('delegate').add_bind(o.value) { '?' }
+        else
+          collector.add_bind(o.value) { '?' }
+        end
       end
 
       def limit_with_rows o, collector
