@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.author = 'Andrey Lobanov (RedSoft)'
   s.name = 'activerecord-rdb-adapter'
-  s.version = '0.9.0'
-  s.date = '2018-03-06'
+  s.version = '0.9.1'
+  s.date = '2019-09-12'
   s.summary = 'ActiveRecord RedDatabase 3+ and Firebird 3+ Adapter'
   s.description = 'ActiveRecord RedDatabase 3+ and Firebird 3+ Adapter for Rails 5+'
   s.licenses = ['MIT']
@@ -13,5 +13,5 @@ Gem::Specification.new do |s|
   s.files = Dir['README.md', 'lib/**/*', 'extconf.rb', 'fb.c', 'fb_extensions.rb']
   s.extensions = ['extconf.rb'] if s.platform == Gem::Platform::RUBY
 
-  s.add_dependency 'rails', '~> 5.1'
+  s.add_dependency 'rails', '~> 5.2'
 end
