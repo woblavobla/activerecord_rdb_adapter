@@ -1,16 +1,16 @@
-require 'test/FbTestCases'
+require_relative 'FbTestCases'
 
 class CursorTestCases < FbTestCase
   include FbTestCases
 
   def test_fetch_array
     Database.create(@parms) do |connection|
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         assert_instance_of Cursor, cursor
         row = cursor.fetch :array
         assert_instance_of Array, row
         if @fb_version == 3
-          assert_equal 5, row.size
+          assert_equal 6, row.size
         else
           assert_equal 4, row.size
         end
@@ -27,12 +27,12 @@ class CursorTestCases < FbTestCase
 
   def test_fetch_hash
     Database.create(@parms) do |connection|
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         assert_instance_of Cursor, cursor
         row = cursor.fetch :hash
         assert_instance_of Hash, row
         if @fb_version == 3
-          assert_equal 5, row.size
+          assert_equal 6, row.size
         else
           assert_equal 4, row.size
         end
@@ -49,14 +49,14 @@ class CursorTestCases < FbTestCase
 
   def test_fetch_all_array
     Database.create(@parms) do |connection|
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         assert_instance_of Cursor, cursor
         rows = cursor.fetchall :array
         assert_instance_of Array, rows
         assert_equal 1, rows.size
         assert_instance_of Array, rows[0]
         if @fb_version == 3
-          assert_equal 5, rows[0].size
+          assert_equal 6, rows[0].size
         else
           assert_equal 4, rows[0].size
         end
@@ -67,14 +67,14 @@ class CursorTestCases < FbTestCase
 
   def test_fetch_all_hash
     Database.create(@parms) do |connection|
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         assert_instance_of Cursor, cursor
         rows = cursor.fetchall :hash
         assert_instance_of Array, rows
         assert_equal 1, rows.size
         assert_instance_of Hash, rows[0]
         if @fb_version == 3
-          assert_equal 5, rows[0].size
+          assert_equal 6, rows[0].size
         else
           assert_equal 4, rows[0].size
         end
@@ -85,21 +85,22 @@ class CursorTestCases < FbTestCase
 
   def test_fields_array
     Database.create(@parms) do |connection|
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         fields = cursor.fields
         fields_ary = cursor.fields :array
         assert_equal fields, fields_ary
         if @fb_version == 3
-          assert_equal 5, fields.size
+          assert_equal 6, fields.size
         else
           assert_equal 4, fields.size
         end
-        assert_equal "RDB$DESCRIPTION", fields[0].name;
-        assert_equal "RDB$RELATION_ID", fields[1].name;
-        assert_equal "RDB$SECURITY_CLASS", fields[2].name;
-        assert_equal "RDB$CHARACTER_SET_NAME", fields[3].name;
+        assert_equal 'RDB$DESCRIPTION', fields[0].name
+        assert_equal 'RDB$RELATION_ID', fields[1].name
+        assert_equal 'RDB$SECURITY_CLASS', fields[2].name
+        assert_equal 'RDB$CHARACTER_SET_NAME', fields[3].name
         if @fb_version == 3
-          assert_equal "RDB$LINGER", fields[4].name;
+          assert_equal 'RDB$LINGER', fields[4].name
+          assert_equal 'RDB$SQL_SECURITY', fields[5].name
         end
       end
       connection.drop
@@ -108,21 +109,22 @@ class CursorTestCases < FbTestCase
 
   def test_fields_array_downcased
     Database.create(@parms.merge(:downcase_names => true)) do |connection| # xxx true
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         fields = cursor.fields
         fields_ary = cursor.fields :array
         assert_equal fields, fields_ary
         if @fb_version == 3
-          assert_equal 5, fields.size
+          assert_equal 6, fields.size
         else
           assert_equal 4, fields.size
         end
-        assert_equal "rdb$description", fields[0].name;
-        assert_equal "rdb$relation_id", fields[1].name;
-        assert_equal "rdb$security_class", fields[2].name;
-        assert_equal "rdb$character_set_name", fields[3].name;
+        assert_equal 'rdb$description', fields[0].name
+        assert_equal 'rdb$relation_id', fields[1].name
+        assert_equal 'rdb$security_class', fields[2].name
+        assert_equal 'rdb$character_set_name', fields[3].name
         if @fb_version == 3
-          assert_equal "rdb$linger", fields[4].name;
+          assert_equal 'rdb$linger', fields[4].name
+          assert_equal 'rdb$sql_security', fields[5].name
         end
       end
       connection.drop
@@ -131,19 +133,20 @@ class CursorTestCases < FbTestCase
 
   def test_fields_hash
     Database.create(@parms) do |connection|
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         fields = cursor.fields :hash
         if @fb_version == 3
-          assert_equal 5, fields.size
+          assert_equal 6, fields.size
         else
           assert_equal 4, fields.size
         end
-        assert_equal 520, fields["RDB$DESCRIPTION"].type_code
-        assert_equal 500, fields["RDB$RELATION_ID"].type_code
-        assert_equal 452, fields["RDB$SECURITY_CLASS"].type_code
-        assert_equal 452, fields["RDB$CHARACTER_SET_NAME"].type_code
+        assert_equal 520, fields['RDB$DESCRIPTION'].type_code
+        assert_equal 500, fields['RDB$RELATION_ID'].type_code
+        assert_equal 452, fields['RDB$SECURITY_CLASS'].type_code
+        assert_equal 452, fields['RDB$CHARACTER_SET_NAME'].type_code
         if @fb_version == 3
-          assert_equal 496, fields["RDB$LINGER"].type_code
+          assert_equal 496, fields['RDB$LINGER'].type_code
+          assert_equal 32_764, fields['RDB$SQL_SECURITY'].type_code
         end
       end
       connection.drop
@@ -152,19 +155,20 @@ class CursorTestCases < FbTestCase
 
   def test_fields_hash_downcased
     Database.create(@parms.merge(:downcase_names => true)) do |connection| # xxx true
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         fields = cursor.fields :hash
         if @fb_version == 3
-          assert_equal 5, fields.size
+          assert_equal 6, fields.size
         else
           assert_equal 4, fields.size
         end
-        assert_equal 520, fields["rdb$description"].type_code
-        assert_equal 500, fields["rdb$relation_id"].type_code
-        assert_equal 452, fields["rdb$security_class"].type_code
-        assert_equal 452, fields["rdb$character_set_name"].type_code
+        assert_equal 520, fields['rdb$description'].type_code
+        assert_equal 500, fields['rdb$relation_id'].type_code
+        assert_equal 452, fields['rdb$security_class'].type_code
+        assert_equal 452, fields['rdb$character_set_name'].type_code
         if @fb_version == 3
-          assert_equal 496, fields["rdb$linger"].type_code
+          assert_equal 496, fields['rdb$linger'].type_code
+          assert_equal 32_764, fields['rdb$sql_security'].type_code
         end
       end
       connection.drop
@@ -173,13 +177,13 @@ class CursorTestCases < FbTestCase
 
   def test_each_array
     Database.create(@parms) do |connection|
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         count = 0
         cursor.each :array do |row|
           count += 1
           assert_instance_of Array, row
           if @fb_version == 3
-            assert_equal 5, row.size
+            assert_equal 6, row.size
           else
             assert_equal 4, row.size
           end
@@ -192,13 +196,13 @@ class CursorTestCases < FbTestCase
 
   def test_each_hash
     Database.create(@parms) do |connection|
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         count = 0
         cursor.each :hash do |row|
           count += 1
           assert_instance_of Hash, row
           if @fb_version == 3
-            assert_equal 5, row.size
+            assert_equal 6, row.size
           else
             assert_equal 4, row.size
           end
@@ -211,8 +215,8 @@ class CursorTestCases < FbTestCase
 
   def test_fetch_after_nil
     Database.create(@parms) do |connection|
-      connection.execute("create generator test_seq");
-      connection.execute("select gen_id(test_seq, 1) from rdb$database") do |cursor|
+      connection.execute('create generator test_seq')
+      connection.execute('select gen_id(test_seq, 1) from rdb$database') do |cursor|
         r1 = cursor.fetch
         assert !r1.nil?
         r2 = cursor.fetch
@@ -221,7 +225,7 @@ class CursorTestCases < FbTestCase
           r3 = cursor.fetch
         end
       end
-      connection.execute("select * from rdb$database") do |cursor|
+      connection.execute('select * from rdb$database') do |cursor|
         r1 = cursor.fetch
         assert !r1.nil?
         r2 = cursor.fetch
@@ -235,17 +239,17 @@ class CursorTestCases < FbTestCase
   end
 
   def test_fetch_hash_with_aliased_fields
-    sql = "SELECT RDB$DESCRIPTION DES, RDB$RELATION_ID REL, RDB$SECURITY_CLASS SEC, RDB$CHARACTER_SET_NAME FROM RDB$DATABASE"
+    sql = 'SELECT RDB$DESCRIPTION DES, RDB$RELATION_ID REL, RDB$SECURITY_CLASS SEC, RDB$CHARACTER_SET_NAME FROM RDB$DATABASE'
     Database.create(@parms) do |connection|
       connection.execute(sql) do |cursor|
         assert_instance_of Cursor, cursor
         row = cursor.fetch :hash
         assert_instance_of Hash, row
         assert_equal 4, row.size
-        assert row.keys.include?("DES"), "No field DES"
-        assert row.keys.include?("REL"), "No field REL"
-        assert row.keys.include?("SEC"), "No field SEC"
-        assert row.keys.include?("RDB$CHARACTER_SET_NAME"), "No field RDB$CHARACTER_SET_NAME"
+        assert row.keys.include?('DES'), 'No field DES'
+        assert row.keys.include?('REL'), 'No field REL'
+        assert row.keys.include?('SEC'), 'No field SEC'
+        assert row.keys.include?('RDB$CHARACTER_SET_NAME'), 'No field RDB$CHARACTER_SET_NAME'
       end
       connection.drop
     end
@@ -256,10 +260,10 @@ class CursorTestCases < FbTestCase
       CREATE TABLE MASTER (ID INT, NAME1 VARCHAR(10));
       CREATE TABLE DETAIL (ID INT, MASTER_ID INT, NAME2 VARCHAR(10));
     END
-    sql_insert_master = "INSERT INTO MASTER (ID, NAME1) VALUES (?, ?)"
-    sql_insert_detail = "INSERT INTO DETAIL (ID, MASTER_ID, NAME2) VALUES (?, ?, ?)"
-    sql_select_master = "SELECT * FROM MASTER ORDER BY ID"
-    sql_select_detail = "SELECT * FROM DETAIL ORDER BY ID"
+    sql_insert_master = 'INSERT INTO MASTER (ID, NAME1) VALUES (?, ?)'
+    sql_insert_detail = 'INSERT INTO DETAIL (ID, MASTER_ID, NAME2) VALUES (?, ?, ?)'
+    sql_select_master = 'SELECT * FROM MASTER ORDER BY ID'
+    sql_select_detail = 'SELECT * FROM DETAIL ORDER BY ID'
     Database.create(@parms) do |connection|
       connection.execute_script(sql_schema)
       connection.transaction do

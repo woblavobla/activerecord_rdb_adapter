@@ -1,8 +1,8 @@
-require 'test/FbTestCases'
+require_relative 'FbTestCases'
 
 class TransactionTestCases < FbTestCase
   include FbTestCases
-  
+
   def test_transaction
     Database.create(@parms) do |connection|
       n = 0

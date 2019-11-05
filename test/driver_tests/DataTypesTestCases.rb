@@ -1,5 +1,5 @@
 require 'bigdecimal'
-require 'test/FbTestCases'
+require_relative 'FbTestCases'
 
 class DataTypesTestCases < FbTestCase
   include FbTestCases
@@ -13,7 +13,7 @@ class DataTypesTestCases < FbTestCase
   end
   
   def gen_bi(i)
-    i * 1000000000
+    i * 1_000_000_000
   end
   
   def gen_f(i)
@@ -61,7 +61,7 @@ class DataTypesTestCases < FbTestCase
   end
 
   def gen_d92(i)
-    i * 10000
+    i * 10_000
   end
 
   def sum_i(range)
@@ -210,8 +210,8 @@ class DataTypesTestCases < FbTestCase
     sql_select = "select * from test order by id"
     Database.create(@parms) do |connection|
       connection.execute(sql_schema);
-      memo = IO.read("fb.c")
-      assert memo.size > 50000
+      memo = IO.read(File.expand_path('fb.c'))
+      assert memo.size > 50_000
       connection.transaction do
         10.times do |i|
           connection.execute(sql_insert, i, i.to_s, memo);
@@ -234,14 +234,13 @@ class DataTypesTestCases < FbTestCase
     sql_schema = "create table test (id int, name varchar(20), attachment blob segment size 1000)"
     sql_insert = "insert into test (id, name, attachment) values (?, ?, ?)"
     sql_select = "select * from test order by id"
-    #filename = "data.dat"
-    filename = "fb.c"
+    filename = File.expand_path('fb.c')
     Database.create(@parms) do |connection|
       connection.execute(sql_schema);
-      attachment = File.open(filename,"rb") do |f|
+      attachment = File.open(filename, "rb") do |f|
         f.read * 3
       end
-      assert((attachment.size > 150000), "Not expected size")
+      assert((attachment.size > 150_000), "Not expected size")
       connection.transaction do
         3.times do |i|
           connection.execute(sql_insert, i, i.to_s, attachment);
@@ -280,7 +279,7 @@ class DataTypesTestCases < FbTestCase
             connection.execute(sql_insert, Time.now)
           end
           assert_raises RangeError do
-            connection.execute(sql_insert, 5000000000)
+            connection.execute(sql_insert, 5_000_000_000)
           end
         elsif cols[i] == 'SI'
           assert_raises TypeError do
@@ -290,7 +289,7 @@ class DataTypesTestCases < FbTestCase
             connection.execute(sql_insert, Time.now)
           end
           assert_raises RangeError do
-            connection.execute(sql_insert, 100000)
+            connection.execute(sql_insert, 100_000)
           end
         elsif cols[i] == 'BI'
           assert_raises TypeError do
@@ -300,7 +299,7 @@ class DataTypesTestCases < FbTestCase
             connection.execute(sql_insert, Time.now)
           end
           assert_raises RangeError do
-            connection.execute(sql_insert, 184467440737095516160) # 2^64 * 10
+            connection.execute(sql_insert, 184_467_440_737_095_516_160) # 2^64 * 10
           end
         elsif cols[i] == 'F'
           assert_raises TypeError do
@@ -326,7 +325,7 @@ class DataTypesTestCases < FbTestCase
           end
         elsif cols[i].include?('VC10000')
           assert_raises RangeError do
-            connection.execute(sql_insert, "X" * 10001)
+            connection.execute(sql_insert, "X" * 10_001)
           end
         elsif cols[i] == 'C'
           assert_raises RangeError do
@@ -348,14 +347,14 @@ class DataTypesTestCases < FbTestCase
             connection.execute(sql_insert, {:date => "2006/1/1"})
           end
           assert_raises TypeError do
-            connection.execute(sql_insert, 10000)
+            connection.execute(sql_insert, 10_000)
           end
         elsif cols[i] ==  'TS'
           assert_raises TypeError do
             connection.execute(sql_insert, 5.5)
           end
           assert_raises TypeError do
-            connection.execute(sql_insert, 10000)
+            connection.execute(sql_insert, 10_000)
           end
         elsif cols[i] ==  'N92'
           assert_raises TypeError do
@@ -365,7 +364,7 @@ class DataTypesTestCases < FbTestCase
             connection.execute(sql_insert, Time.now)
           end
           assert_raises RangeError do
-            connection.execute(sql_insert, 5000000000)
+            connection.execute(sql_insert, 5_000_000_000)
           end
         elsif cols[i] ==  'D92' 
           assert_raises TypeError do
@@ -375,7 +374,7 @@ class DataTypesTestCases < FbTestCase
             connection.execute(sql_insert, Time.now)
           end
           assert_raises RangeError do
-            connection.execute(sql_insert, 5000000000)
+            connection.execute(sql_insert, 5_000_000_000)
           end
         end
       end
@@ -421,11 +420,11 @@ class DataTypesTestCases < FbTestCase
           assert_equal 5.75, vals[0][0]
           assert_equal 5.75, vals[1][0]
         elsif cols[i] == 'D'
-          connection.execute(sql_insert, 12345.12345)
+          connection.execute(sql_insert, 12_345.12345)
           connection.execute(sql_insert, "12345.12345")
           vals = connection.query(sql_select)
-          assert_equal 12345.12345, vals[0][0]
-          assert_equal 12345.12345, vals[1][0]
+          assert_equal 12_345.12345, vals[0][0]
+          assert_equal 12_345.12345, vals[1][0]
         elsif cols[i] == 'VC'
           connection.execute(sql_insert, "5")
           connection.execute(sql_insert, 5)
@@ -434,7 +433,7 @@ class DataTypesTestCases < FbTestCase
           assert_equal "5", vals[1][0]
         elsif cols[i] ==  'VC10'
           connection.execute(sql_insert, "1234567890")
-          connection.execute(sql_insert, 1234567890)
+          connection.execute(sql_insert, 1_234_567_890)
           vals = connection.query(sql_select)
           assert_equal "1234567890", vals[0][0]
           assert_equal "1234567890", vals[1][0]
@@ -452,57 +451,57 @@ class DataTypesTestCases < FbTestCase
           assert_equal "5", vals[1][0]
         elsif cols[i] == 'C10'
           connection.execute(sql_insert, "1234567890")
-          connection.execute(sql_insert, 1234567890)
+          connection.execute(sql_insert, 1_234_567_890)
           vals = connection.query(sql_select)
           assert_equal "1234567890", vals[0][0]
           assert_equal "1234567890", vals[1][0]
         elsif cols[i] == 'DT'
-          connection.execute(sql_insert, Date.civil(2000,2,2))
+          connection.execute(sql_insert, Date.civil(2000, 2, 2))
           connection.execute(sql_insert, "2000/2/2")
           connection.execute(sql_insert, "2000-2-2")
           vals = connection.query(sql_select)
-          assert_equal Date.civil(2000,2,2), vals[0][0]
-          assert_equal Date.civil(2000,2,2), vals[1][0]
+          assert_equal Date.civil(2000, 2, 2), vals[0][0]
+          assert_equal Date.civil(2000, 2, 2), vals[1][0]
         elsif cols[i] == 'TM'
-          connection.execute(sql_insert, Time.utc(2000,1,1,2,22,22))
+          connection.execute(sql_insert, Time.utc(2000, 1, 1, 2, 22, 22))
           connection.execute(sql_insert, "2000/1/1 2:22:22")
           connection.execute(sql_insert, "2000-1-1 2:22:22")
           vals = connection.query(sql_select)
-          assert_equal Time.utc(2000,1,1,2,22,22), vals[0][0]
-          assert_equal Time.utc(2000,1,1,2,22,22), vals[1][0]
+          assert_equal Time.utc(2000, 1, 1, 2, 22, 22), vals[0][0]
+          assert_equal Time.utc(2000, 1, 1, 2, 22, 22), vals[1][0]
         elsif cols[i] ==  'TS'
-          connection.execute(sql_insert, Time.local(2006,6,6,3,33,33))
+          connection.execute(sql_insert, Time.local(2006, 6, 6, 3, 33, 33))
           connection.execute(sql_insert, "2006/6/6 3:33:33")
           connection.execute(sql_insert, "2006-6-6 3:33:33")
           vals = connection.query(sql_select)
-          assert_equal Time.local(2006,6,6,3,33,33), vals[0][0]
-          assert_equal Time.local(2006,6,6,3,33,33), vals[1][0]
-          assert_equal Time.local(2006,6,6,3,33,33), vals[2][0]
+          assert_equal Time.local(2006, 6, 6, 3, 33, 33), vals[0][0]
+          assert_equal Time.local(2006, 6, 6, 3, 33, 33), vals[1][0]
+          assert_equal Time.local(2006, 6, 6, 3, 33, 33), vals[2][0]
         elsif cols[i] == 'N92'
-          connection.execute(sql_insert, 12345.12)
+          connection.execute(sql_insert, 12_345.12)
           connection.execute(sql_insert, "12345.12")
-          connection.execute(sql_insert, -12345.12)
+          connection.execute(sql_insert, -12_345.12)
           vals = connection.query(sql_select)
           assert vals[0][0].is_a?(BigDecimal), "Numeric(9, 2) must return BigDecimal"
-          assert_equal 12345.12, vals[0][0], "NUMERIC (decimal)"
-          assert_equal 12345.12, vals[1][0], "NUMERIC (string)"
-          assert_equal -12345.12, vals[2][0], "NUMERIC (string)"
+          assert_equal 12_345.12, vals[0][0], "NUMERIC (decimal)"
+          assert_equal 12_345.12, vals[1][0], "NUMERIC (string)"
+          assert_equal -12_345.12, vals[2][0], "NUMERIC (string)"
         elsif cols[i] == 'D92'
-          connection.execute(sql_insert, 12345.12)
+          connection.execute(sql_insert, 12_345.12)
           connection.execute(sql_insert, "12345.12")
-          connection.execute(sql_insert, -12345.12)
+          connection.execute(sql_insert, -12_345.12)
           vals = connection.query(sql_select)
           assert vals[0][0].is_a?(BigDecimal), "Decimal(9,2) must return BigDecimal"
-          assert_equal 12345.12, vals[0][0], "DECIMAL (decimal)"
-          assert_equal 12345.12, vals[1][0], "DECIMAL (string)"
-          assert_equal -12345.12, vals[2][0], "DECIMAL (string)"
+          assert_equal 12_345.12, vals[0][0], "DECIMAL (decimal)"
+          assert_equal 12_345.12, vals[1][0], "DECIMAL (string)"
+          assert_equal -12_345.12, vals[2][0], "DECIMAL (string)"
         elsif cols[i] == 'N154'
-          connection.execute(sql_insert, 91520.65)
+          connection.execute(sql_insert, 91_520.65)
           connection.execute(sql_insert, "91520.65")
-          connection.execute(sql_insert, -91520.65)
+          connection.execute(sql_insert, -91_520.65)
           vals = connection.query(sql_select)
           assert vals[0][0].is_a?(BigDecimal), "Numeric(15,4) must return BigDecimal"
-          assert Float(91520.65) != vals[0][0]
+          assert Float(91_520.65) != vals[0][0]
           assert_equal BigDecimal('91520.65'), vals[0][0]
           assert_equal BigDecimal('91520.65'), vals[1][0]
           assert_equal BigDecimal('-91520.65'), vals[2][0]

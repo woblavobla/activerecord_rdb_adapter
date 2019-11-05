@@ -1,5 +1,5 @@
 #coding:utf-8
-require 'test/FbTestCases'
+require 'FbTestCases'
 
 class EncodingTestCases < FbTestCase
   include FbTestCases

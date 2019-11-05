@@ -1,8 +1,8 @@
-require 'test/FbTestCases'
+require_relative 'FbTestCases'
 
 class DatabaseTestCases < FbTestCase
   include FbTestCases
-  
+
   def setup
     super
     @database = "localhost:#{@db_file}"
@@ -19,12 +19,12 @@ class DatabaseTestCases < FbTestCase
       :charset => 'NONE',
       :role => 'WRITER' }
   end
-  
+
   def test_new
     db = Database.new
     assert_instance_of Database, db
   end
-  
+
   def test_properties_read
     db = Database.new
     assert_nil db.database
@@ -47,7 +47,7 @@ class DatabaseTestCases < FbTestCase
     db.role = 'READER'
     assert_equal 'READER', db.role
   end
-  
+
   def test_initialize_hash
     db = Database.new(@parms)
     assert_equal @database, db.database
@@ -56,7 +56,7 @@ class DatabaseTestCases < FbTestCase
     assert_equal 'NONE', db.charset
     assert_equal 'READER', db.role
   end
-  
+
   def test_initialize_string
     db = Database.new(@parms_s)
     assert_equal @database, db.database
@@ -65,13 +65,13 @@ class DatabaseTestCases < FbTestCase
     assert_equal 'NONE', db.charset
     assert_equal 'READER', db.role
   end
-  
+
   def test_create_instance
     db = Database.new(@parms)
     db.create
     assert File.exists?(@db_file)
   end
-  
+
   def test_create_instance_block
     db = Database.new(@parms)
     db.create do |connection|
@@ -84,7 +84,7 @@ class DatabaseTestCases < FbTestCase
     end
     assert File.exists?(@db_file)
   end
-  
+
   def test_create_singleton
     db = Database.create(@parms);
     assert File.exists?(@db_file)
@@ -105,7 +105,7 @@ class DatabaseTestCases < FbTestCase
     assert_instance_of Database, db
     assert File.exists?(@db_file)
   end
-  
+
   def test_create_bad_param
     assert_raises TypeError do
       db = Database.create(1)
@@ -131,7 +131,7 @@ class DatabaseTestCases < FbTestCase
     assert_instance_of Connection, connection
     connection.close
   end
-  
+
   def test_drop_instance
     assert !File.exists?(@db_file)
     db = Database.create(@parms)
@@ -139,7 +139,7 @@ class DatabaseTestCases < FbTestCase
     db.drop
     assert !File.exists?(@db_file)
   end
-  
+
   def test_drop_singleton
     assert !File.exists?(@db_file)
     Database.create(@parms)
@@ -147,12 +147,13 @@ class DatabaseTestCases < FbTestCase
     Database.drop(@parms)
     assert !File.exists?(@db_file)
   end
-  
+
   def test_role_support
     Database.create(@parms) do |connection|
       connection.execute("create table test (id int, test varchar(10))")
       connection.execute("create role writer")
       connection.execute("grant all on test to writer")
+      # connection.execute("create user rubytest password 'rubytest' using plugin Srp")
       connection.execute("grant writer to rubytest")
       connection.commit
       connection.execute("insert into test values (1, 'test role')")
@@ -174,4 +175,4 @@ class DatabaseTestCases < FbTestCase
     Database.drop(@parms)
   end
 end
-    
+

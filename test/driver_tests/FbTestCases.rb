@@ -26,10 +26,10 @@ module FbTestCases
 
   def setup
     @db_file = case RUBY_PLATFORM
-      when /win32/ then 'c:/var/fbdata/drivertest.fdb'
-      when /darwin/ then File.join(File.expand_path(File.dirname(__FILE__)), 'drivertest.fdb')
-      else '/var/fbdata/drivertest.fdb'
-    end
+               when /win32/ then 'c:/var/fbdata/drivertest.fdb'
+               when /darwin/ then File.join(File.expand_path(File.dirname(__FILE__)), 'drivertest.fdb')
+               else '/var/fbdata/drivertest.fdb'
+               end
     @db_host = 'localhost'
     @username = 'sysdba'
     @password = 'masterkey'
@@ -44,11 +44,8 @@ module FbTestCases
     rm_rf @db_file
 
     Database.create(@parms) do |connection|
-      
       d = connection.query("SELECT substring(rdb$get_context('SYSTEM', 'ENGINE_VERSION') from 1 for 1) from rdb$database")
-      
       @fb_version = Integer(d.first[0])
-
       connection.drop
     end
 
