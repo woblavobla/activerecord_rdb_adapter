@@ -1,24 +1,23 @@
-require 'active_record/tasks/database_tasks'
-
 module ActiveRecord
-  module Tasks
+  module Tasks # :nodoc:
     class RdbDatabaseTasks # :nodoc:
-      delegate :rdb_connection_config, :establish_connection, to: ::ActiveRecord::Base
+      delegate :rdb_connection, :rdb_connection_config, :establish_connection, to: ::ActiveRecord::Base
 
-      def initialize(configuration, root = ::ActiveRecord::Tasks::DatabaseTasks.root)
-        @root = root
+      def initialize(configuration)
         @configuration = rdb_connection_config(configuration)
       end
 
       def create
         rdb_database.create
+        # create_db
         establish_connection configuration
       rescue ::Fb::Error => e
-        raise unless e.message.include?('database or file exists')
+        raise unless e.message.include?('File exists')
         raise DatabaseAlreadyExists
       end
 
       def drop
+        establish_connection configuration
         rdb_database.drop
       rescue ::Fb::Error => e
         raise ::ActiveRecord::ConnectionNotEstablished, e.message
@@ -76,7 +75,6 @@ module ActiveRecord
 
       attr_reader :configuration
 
-      attr_reader :root
     end
   end
 end

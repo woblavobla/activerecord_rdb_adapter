@@ -93,6 +93,88 @@ module ActiveRecord
         def last_inserted_id(_result)
           nil
         end
+
+        def insert_fixtures_set(fixture_set, tables_to_delete = [])
+          fixture_inserts = fixture_set.map do |table_name, fixtures|
+            next if fixtures.empty?
+
+            build_fixture_sql(fixtures, table_name).collect {|f| f }
+          end.compact
+
+          table_deletes = tables_to_delete.map { |table| "DELETE FROM #{quote_table_name table}".dup }
+          sql = fixture_inserts.flatten(1)
+          sql.unshift(*table_deletes)
+
+          transaction(requires_new: true) do
+            sql.each do |s|
+              execute s, 'Fixture load'
+            end
+          end
+        end
+
+        private
+
+        def default_insert_value(column)
+          if column.default.nil?
+            Arel.sql('NULL')
+          else
+            Arel.sql(quote(column.default))
+          end
+        end
+
+        def build_fixture_sql(fixtures, table_name)
+          columns = schema_cache.columns_hash(table_name)
+
+          values = fixtures.map do |fixture|
+            fixture = fixture.stringify_keys
+
+            unknown_columns = fixture.keys - columns.keys
+            if unknown_columns.any?
+              raise Fixture::FixtureError, %(table "#{table_name}" has no columns named #{unknown_columns.map(&:inspect).join(', ')}.)
+            end
+
+            columns.map do |name, column|
+              if fixture.key?(name)
+                type = lookup_cast_type_from_column(column)
+                bind = Relation::QueryAttribute.new(name, fixture[name], type)
+                with_yaml_fallback(bind.value_for_database)
+              else
+                default_insert_value(column)
+              end
+            end
+          end
+
+          sql ||= []
+
+          values.each_with_index do |row, i|
+            s = ''
+            s << "INSERT INTO #{quote_table_name(table_name)}"
+
+            unless columns.empty?
+              s << ' ('
+              columns.each_with_index do |x, y|
+                s << ', ' unless y == 0
+                s << quote_column_name(x[1].name)
+              end
+              s << ')'
+            end
+
+            s << ' VALUES ('
+            row.each_with_index do |value, k|
+              s << ', ' unless k == 0
+              case value
+              when Arel::Nodes::SqlLiteral, Arel::Nodes::BindParam
+                s << value.to_s
+              else
+                s << quote(value).to_s
+              end
+            end
+            s << ');'
+            sql << s
+          end
+
+          sql
+        end
       end
     end
   end

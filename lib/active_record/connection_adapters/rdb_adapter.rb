@@ -86,6 +86,10 @@ module ActiveRecord
         1499
       end
 
+      def supports_multi_insert?
+        false
+      end
+
       def active?
         return false unless @connection.open?
         # return true if @connection.transaction_started

@@ -59,6 +59,7 @@ module ActiveRecord
           end
 
           return if options[:sequence] == false || !needs_sequence
+
           create_sequence(options[:sequence] || default_sequence_name(name))
           trg_sql = <<-END_SQL
             CREATE TRIGGER N$#{name.upcase} FOR #{name.upcase}
@@ -135,12 +136,13 @@ module ActiveRecord
           create_sequence(options[:sequence] || default_sequence_name(table_name)) if type == :primary_key && options[:sequence] != false
 
           return unless options[:position]
+
           # position is 1-based but add 1 to skip id column
-          execute(squish_sql(<<-end_sql))
+          execute(squish_sql(<<-END_SQL))
             ALTER TABLE #{quote_table_name(table_name)}
             ALTER COLUMN #{quote_column_name(column_name)}
             POSITION #{options[:position] + 1}
-          end_sql
+          END_SQL
         end
 
         def remove_column(table_name, column_name, type = nil, options = {})

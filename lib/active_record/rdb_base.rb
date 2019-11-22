@@ -4,6 +4,7 @@ module ActiveRecord
       require 'fb'
       config = rdb_connection_config(config)
       db = ::Fb::Database.new(config)
+      @database = db
       begin
         connection = db.connect
       rescue StandardError

@@ -3,21 +3,43 @@ module Arel
     class Rdb < Arel::Visitors::ToSql # :nodoc
       private
 
-      def visit_Arel_Nodes_SelectStatement o, collector
-        collector << "SELECT "
+      def visit_Arel_Nodes_InsertStatement(o, collector)
+        collector << "INSERT INTO "
+        collector = visit o.relation, collector
+
+        unless o.columns.empty?
+          collector << " ("
+          o.columns.each_with_index do |x, i|
+            collector << ", " unless i == 0
+            collector << quote_column_name(x.name)
+          end
+          collector << ")"
+        end
+
+        if o.values
+          maybe_visit o.values, collector
+        elsif o.select
+          maybe_visit o.select, collector
+        else
+          collector
+        end
+      end
+
+      def visit_Arel_Nodes_SelectStatement(o, collector)
+        collector << 'SELECT '
         collector = visit o.offset, collector if o.offset && !o.limit
 
-        collector = o.cores.inject(collector) {|c, x|
+        collector = o.cores.inject(collector) do |c, x|
           visit_Arel_Nodes_SelectCore(x, c)
-        }
+        end
 
         unless o.orders.empty?
           collector << ORDER_BY
           len = o.orders.length - 1
-          o.orders.each_with_index {|x, i|
+          o.orders.each_with_index do |x, i|
             collector = visit(x, collector)
             collector << COMMA unless len == i
-          }
+          end
         end
 
         if o.limit && o.offset
@@ -29,7 +51,7 @@ module Arel
         maybe_visit o.lock, collector
       end
 
-      def visit_Arel_Nodes_SelectCore o, collector
+      def visit_Arel_Nodes_SelectCore(o, collector)
         if o.set_quantifier
           collector = visit o.set_quantifier, collector
           collector << SPACE
@@ -44,7 +66,7 @@ module Arel
         end
 
         if o.source && !o.source.empty?
-          collector << " FROM "
+          collector << ' FROM '
           collector = visit o.source, collector
         end
 
@@ -69,7 +91,7 @@ module Arel
           collector = maybe_visit o.having, collector
         else
           unless o.havings.empty?
-            collector << " HAVING "
+            collector << ' HAVING '
             inject_join o.havings, collector, AND
           end
         end
@@ -77,33 +99,34 @@ module Arel
         collector
       end
 
-      def visit_Arel_Nodes_Limit o, collector
-        collector << " ROWS "
+      def visit_Arel_Nodes_Limit(o, collector)
+        collector << ' ROWS '
         visit o.expr, collector
       end
 
-      def visit_Arel_Nodes_Offset o, collector
-        collector << " SKIP "
+      def visit_Arel_Nodes_Offset(o, collector)
+        collector << ' SKIP '
         visit o.expr, collector
       end
 
       def limit_with_rows o, collector
-        o.offset.expr.value = ActiveModel::Attribute.with_cast_value("OFFSET".freeze,
+        o.offset.expr.value = ActiveModel::Attribute.with_cast_value('OFFSET'.freeze,
                                                                      o.offset.expr.value.value + 1,
                                                                      ActiveModel::Type.default_value)
         offset = o.offset.expr.value
-        o.limit.expr.value = ActiveModel::Attribute.with_cast_value("LIMIT".freeze,
-                                                                    (o.limit.expr.value.value) + (offset.value - 1),
+        o.limit.expr.value = ActiveModel::Attribute.with_cast_value('LIMIT'.freeze,
+                                                                    o.limit.expr.value.value + (offset.value - 1),
                                                                     ActiveModel::Type.default_value)
         limit = o.limit.expr.value
-        collector << " ROWS "
-        collector.add_bind(offset) {|i| "?"}
-        collector << " TO "
-        collector.add_bind(limit) {|i| "?"}
+        collector << ' ROWS '
+        collector.add_bind(offset) { |i| '?' }
+        collector << ' TO '
+        collector.add_bind(limit) { |i| '?' }
       end
 
       def quote_column_name name
         return name if Arel::Nodes::SqlLiteral === name
+
         @connection.quote_column_name(name)
       end
 
