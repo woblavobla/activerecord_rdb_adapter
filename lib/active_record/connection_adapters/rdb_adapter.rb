@@ -1,20 +1,20 @@
-require 'fb'
-require 'base64'
-require 'arel'
-require 'arel/visitors/rdb_visitor'
+require_relative 'fb'
+require_relative 'base64'
+require_relative 'arel'
+require_relative 'arel/visitors/rdb_visitor'
 
-require 'active_record'
-require 'active_record/base'
-require 'active_record/connection_adapters/abstract_adapter'
-require 'active_record/connection_adapters/rdb/database_statements'
-require 'active_record/connection_adapters/rdb/database_limits'
-require 'active_record/connection_adapters/rdb/schema_creation'
-require 'active_record/connection_adapters/rdb/schema_dumper'
-require 'active_record/connection_adapters/rdb/schema_statements'
-require 'active_record/connection_adapters/rdb/quoting'
-require 'active_record/connection_adapters/rdb/table_definition'
-require 'active_record/connection_adapters/rdb_column'
-require 'active_record/rdb_base'
+require_relative 'active_record'
+require_relative 'active_record/base'
+require_relative 'active_record/connection_adapters/abstract_adapter'
+require_relative 'active_record/connection_adapters/rdb/database_statements'
+require_relative 'active_record/connection_adapters/rdb/database_limits'
+require_relative 'active_record/connection_adapters/rdb/schema_creation'
+require_relative 'active_record/connection_adapters/rdb/schema_dumper'
+require_relative 'active_record/connection_adapters/rdb/schema_statements'
+require_relative 'active_record/connection_adapters/rdb/quoting'
+require_relative 'active_record/connection_adapters/rdb/table_definition'
+require_relative 'active_record/connection_adapters/rdb_column'
+require_relative 'active_record/rdb_base'
 
 module ActiveRecord
   module ConnectionAdapters
@@ -117,7 +117,7 @@ module ActiveRecord
         reconnect!
       end
 
-      def requires_reloading?
+      def require_relatives_reloading?
         false
       end
 
