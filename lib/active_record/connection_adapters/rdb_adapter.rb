@@ -1,4 +1,4 @@
-require_relative 'fb'
+require 'fb'
 require 'base64'
 require 'arel'
 require 'arel/visitors/rdb_visitor'
