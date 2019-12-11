@@ -351,6 +351,7 @@ module ActiveRecord
 
         def integer_to_sql(limit)
           return 'integer' if limit.nil?
+
           case limit
           when 1..2 then
             'smallint'
@@ -380,7 +381,7 @@ module ActiveRecord
           if limit && limit > 0
             "VARCHAR(#{limit})"
           else
-            'VARCHAR(150)'
+            'VARCHAR(255)'
           end
         end
 
