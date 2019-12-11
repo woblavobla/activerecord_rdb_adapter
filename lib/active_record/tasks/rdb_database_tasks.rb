@@ -32,11 +32,11 @@ module ActiveRecord
         create
       end
 
-      def structure_dump(filename)
+      def structure_dump(filename, structure_dump_flags = nil)
         isql :extract, output: filename
       end
 
-      def structure_load(filename)
+      def structure_load(filename, structure_load_flags = nil)
         isql input: filename
       end
 
@@ -68,9 +68,7 @@ module ActiveRecord
       # Finds the isql command line utility from the PATH
       # Many linux distros call this program isql-fb, instead of isql
       def isql_executable
-        require 'mkmf'
-        exe = %w[isql-fb isql].detect(&method(:find_executable0))
-        exe || abort('Unable to find isql or isql-fb in your $PATH')
+        "/opt/RedDatabase/bin/isql"
       end
 
       attr_reader :configuration
