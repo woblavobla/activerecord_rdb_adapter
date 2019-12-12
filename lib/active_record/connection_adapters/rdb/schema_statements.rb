@@ -378,7 +378,7 @@ module ActiveRecord
         end
 
         def string_to_sql(limit)
-          if limit && limit > 0
+          if limit && limit > 0 && limit < 255
             "VARCHAR(#{limit})"
           else
             'VARCHAR(255)'
