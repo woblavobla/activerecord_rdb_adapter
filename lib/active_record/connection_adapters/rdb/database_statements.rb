@@ -165,6 +165,8 @@ module ActiveRecord
               case value
               when Arel::Nodes::SqlLiteral, Arel::Nodes::BindParam
                 s << value.to_s
+              when Time, Date
+                s << quote(value.strftime("%F %T"))
               else
                 s << quote(value).to_s
               end
