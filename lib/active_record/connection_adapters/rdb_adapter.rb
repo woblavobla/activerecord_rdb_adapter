@@ -149,6 +149,8 @@ module ActiveRecord
           ActiveRecord::RecordNotUnique.new(message)
         when /This operation is not defined for system tables/
           ActiveRecord::ActiveRecordError.new(message)
+        when /Column does not belong to referenced table/,
+          ActiveRecord::StatementInvalid.new(message)
         else
           super
         end
