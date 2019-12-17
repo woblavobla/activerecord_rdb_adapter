@@ -33,7 +33,7 @@ module ActiveRecord
             end
           end
         rescue StandardError => e
-          raise e.message.encode('UTF-8', @connection.encoding)
+          raise e
         end
 
         def explain(arel, binds = [])
