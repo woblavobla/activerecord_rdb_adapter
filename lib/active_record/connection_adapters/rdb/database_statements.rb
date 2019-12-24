@@ -32,8 +32,7 @@ module ActiveRecord
               end
             end
           end
-        rescue RecordNotUnique => e
-          Rails.logger.info "the trace of error:\r\n#{caller.join("\n")}"
+        rescue StandardError => e
           raise e
         end
 
