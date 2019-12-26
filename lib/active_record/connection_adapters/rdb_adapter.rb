@@ -151,7 +151,8 @@ module ActiveRecord
           ActiveRecord::ActiveRecordError.new(message)
         when /Column does not belong to referenced table/,
             /Unsuccessful execution caused by system error that does not preclude successful execution of subsequent statements/,
-            /The cursor identified in the UPDATE or DELETE statement is not positioned on a row/
+            /The cursor identified in the UPDATE or DELETE statement is not positioned on a row/,
+            /Overflow occurred during data type conversion/
           ActiveRecord::StatementInvalid.new(message)
         else
           super
