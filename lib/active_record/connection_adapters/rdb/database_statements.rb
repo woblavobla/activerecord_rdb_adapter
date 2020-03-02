@@ -32,7 +32,7 @@ module ActiveRecord
               end
             end
           end
-        rescue StandardError => e
+        rescue => e
           raise e
         end
 
