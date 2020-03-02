@@ -30,6 +30,9 @@ module ActiveRecord
               else
                 result
               end
+            rescue => e
+              result.close if result && result.is_a?(Fb::Cursor)
+              raise e
             end
           end
         rescue => e
