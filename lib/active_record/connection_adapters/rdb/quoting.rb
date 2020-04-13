@@ -87,7 +87,7 @@ module ActiveRecord
         def _quote(value)
           case value
           when Time, DateTime
-            "'#{value.strftime('%d.%m.%Y %H:%M')}'"
+            "'#{value.strftime('%d.%m.%Y %H:%M:%S')}'"
           when Date
             "'#{value.strftime('%d.%m.%Y')}'"
           else
