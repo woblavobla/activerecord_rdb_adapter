@@ -33,9 +33,6 @@ module ActiveRecord
         super(connection, logger, config)
         # Our Responsibility
         @config = config
-        @visitor = Arel::Visitors::Rdb.new self
-        @prepared_statements = true
-        @visitor.extend(DetermineIfPreparableVisitor)
       end
 
       def arel_visitor
@@ -92,7 +89,7 @@ module ActiveRecord
 
       def active?
         return false unless @connection.open?
-        # return true if @connection.transaction_started
+
         @connection.query('SELECT 1 FROM RDB$DATABASE')
         true
       rescue StandardError
