@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.author = 'Andrey Lobanov (RedSoft)'
   s.name = 'activerecord-rdb-adapter'
-  s.version = '0.9.5'
-  s.date = '2020-02-03'
+  s.version = '0.9.6.beta1'
+  s.date = '2020-04-15'
   s.summary = 'ActiveRecord RedDatabase 3+ and Firebird 3+ Adapter'
   s.description = 'ActiveRecord RedDatabase 3+ and Firebird 3+ Adapter for Rails 5+'
   s.licenses = ['MIT']
